@@ -1,158 +1,202 @@
-# AI Hedge Fund
+# AI Hedge Fund 多语言增强版
 
-This is a proof of concept for an AI-powered hedge fund.  The goal of this project is to explore the use of AI to make trading decisions.  This project is for **educational** purposes only and is not intended for real trading or investment.
+本项目基于开源项目 [ai-hedge-fund](https://github.com/virattt/ai-hedge-fund) 二次开发，在原有「多智能体投研 + 流程编排 + 回测」能力基础上，重点增强了多语言体验与界面可用性，适合需要跨语言团队协作或面向全球用户的场景。
 
-This system employs several agents working together:
+---
 
-1. Aswath Damodaran Agent - The Dean of Valuation, focuses on story, numbers, and disciplined valuation
-2. Ben Graham Agent - The godfather of value investing, only buys hidden gems with a margin of safety
-3. Bill Ackman Agent - An activist investor, takes bold positions and pushes for change
-4. Cathie Wood Agent - The queen of growth investing, believes in the power of innovation and disruption
-5. Charlie Munger Agent - Warren Buffett's partner, only buys wonderful businesses at fair prices
-6. Michael Burry Agent - The Big Short contrarian who hunts for deep value
-7. Mohnish Pabrai Agent - The Dhandho investor, who looks for doubles at low risk
-8. Peter Lynch Agent - Practical investor who seeks "ten-baggers" in everyday businesses
-9. Phil Fisher Agent - Meticulous growth investor who uses deep "scuttlebutt" research 
-10. Rakesh Jhunjhunwala Agent - The Big Bull of India
-11. Stanley Druckenmiller Agent - Macro legend who hunts for asymmetric opportunities with growth potential
-12. Warren Buffett Agent - The oracle of Omaha, seeks wonderful companies at a fair price
-13. Valuation Agent - Calculates the intrinsic value of a stock and generates trading signals
-14. Sentiment Agent - Analyzes market sentiment and generates trading signals
-15. Fundamentals Agent - Analyzes fundamental data and generates trading signals
-16. Technicals Agent - Analyzes technical indicators and generates trading signals
-17. Risk Manager - Calculates risk metrics and sets position limits
-18. Portfolio Manager - Makes final trading decisions and generates orders
+## 🔄 相比原版的主要优化
 
-<img width="1042" alt="Screenshot 2025-03-22 at 6 19 07 PM" src="https://github.com/user-attachments/assets/cbae3dcf-b571-490d-b0ad-3f0f035ac0d4" />
+| 功能 | 原版 | 本仓库改进 |
+|------|------|------------|
+| 多语言支持 | 命令行输出可选语言，Web UI 主要为英文 | **全局多语言**：Web UI + 流程输出 + 侧边栏/弹窗文案全面支持 EN/CN/JA/KO/AR/FR/DE，内建翻译字典与语言切换面板 |
+| 文案管理 | 零散字符串、缺少翻译回退 | 引入统一翻译上下文，所有可见文案通过 `useTranslation` 输出，确保语言切换一致且可维护 |
+| Flow 管理体验 | 流程列表为英文提示 | 流程列表、状态、弹窗、搜索框全面汉化，可根据用户语言调整时间格式与按钮文案 |
+| API 密钥 & 模型设置 | 多处英文 | 设置页面支持多语言文本，API 密钥类别说明 & 错误提示也可本地化 |
+| 样式一致性 | 部分弹窗未对齐主题 | 调整上下文菜单/弹窗背景使用主题 token，深浅色模式保持一致 |
+| 语言配置 | CLI + Web 可切换 | 增强语言状态持久化，Web 端语言切换即刻生效，提示说明均同步更新 |
 
-Note: the system does not actually make any trades.
+> 原项目所有智能体、回测、流程编排特性保持一致，本仓库在此基础上专注国际化与体验提升，方便被 Fork、品牌化或整合至多语言产品中。
 
-[![Twitter Follow](https://img.shields.io/twitter/follow/virattt?style=social)](https://twitter.com/virattt)
+---
 
-## Disclaimer
+## ✨ 核心能力总览
 
-This project is for **educational and research purposes only**.
+- **多智能体投研体系**：内置十余位投资风格化身（巴菲特、木头姐等），可编排协同作业。
+- **可视化流程编排**：可视化拖拽节点、保存模板，实时查看智能体推理进度。
+- **支持多模型引擎**：OpenAI / Anthropic / DeepSeek / Groq / Google / OpenRouter / Ollama。
+- **回测与执行**：提供区间回测、信号分析、持仓曝光等经典量化指标。
+- **本地与云端灵活部署**：Poetry 管理 Python 依赖，前端 Vite + React，自宿主运行即可。
 
-- Not intended for real trading or investment
-- No investment advice or guarantees provided
-- Creator assumes no liability for financial losses
-- Consult a financial advisor for investment decisions
-- Past performance does not indicate future results
+---
 
-By using this software, you agree to use it solely for learning purposes.
+## 🛠 环境准备
 
-## Table of Contents
-- [How to Install](#how-to-install)
-- [How to Run](#how-to-run)
-  - [⌨️ Command Line Interface](#️-command-line-interface)
-  - [🖥️ Web Application](#️-web-application)
-- [How to Contribute](#how-to-contribute)
-- [Feature Requests](#feature-requests)
-- [License](#license)
+| 组件            | 推荐版本                  |
+|-----------------|---------------------------|
+| Python          | 3.11+                     |
+| Poetry          | 1.6+                      |
+| Node.js         | 18 LTS / 20 LTS           |
+| pnpm / npm      | 任意                      |
+| Ollama（可选）  | 用于本地模型推理          |
 
-## How to Install
+---
 
-Before you can run the AI Hedge Fund, you'll need to install it and set up your API keys. These steps are common to both the full-stack web application and command line interface.
+## 🚀 快速开始
 
-### 1. Clone the Repository
+### 1. 克隆仓库
 
 ```bash
-git clone https://github.com/virattt/ai-hedge-fund.git
-cd ai-hedge-fund
+git clone https://github.com/<your-account>/ai-hedge-fund-i18n.git
+cd ai-hedge-fund-i18n
 ```
 
-### 2. Set up API keys
+### 2. 配置环境变量
 
-Create a `.env` file for your API keys:
 ```bash
-# Create .env file for your API keys (in the root directory)
 cp .env.example .env
 ```
 
-Open and edit the `.env` file to add your API keys:
-```bash
-# For running LLMs hosted by openai (gpt-4o, gpt-4o-mini, etc.)
-OPENAI_API_KEY=your-openai-api-key
+在 `.env` 中填入至少一个大模型密钥，例如：
 
-# For getting financial data to power the hedge fund
-FINANCIAL_DATASETS_API_KEY=your-financial-datasets-api-key
+```dotenv
+OPENAI_API_KEY=your-openai-key
+FINANCIAL_DATASETS_API_KEY=your-financialdatasets-key
 ```
 
-**Important**: You must set at least one LLM API key (e.g. `OPENAI_API_KEY`, `GROQ_API_KEY`, `ANTHROPIC_API_KEY`, or `DEEPSEEK_API_KEY`) for the hedge fund to work. 
+若使用本地 Ollama，可省略云端密钥，但需预先安装并拉取模型。
 
-**Financial Data**: Data for AAPL, GOOGL, MSFT, NVDA, and TSLA is free and does not require an API key. For any other ticker, you will need to set the `FINANCIAL_DATASETS_API_KEY` in the .env file.
-
-## How to Run
-
-### ⌨️ Command Line Interface
-
-You can run the AI Hedge Fund directly via terminal. This approach offers more granular control and is useful for automation, scripting, and integration purposes.
-
-<img width="992" alt="Screenshot 2025-01-06 at 5 50 17 PM" src="https://github.com/user-attachments/assets/e8ca04bf-9989-4a7d-a8b4-34e04666663b" />
-
-#### Quick Start
-
-1. Install Poetry (if not already installed):
-```bash
-curl -sSL https://install.python-poetry.org | python3 -
-```
-
-2. Install dependencies:
-```bash
-poetry install
-```
-
-#### Run the AI Hedge Fund
-```bash
-poetry run python src/main.py --ticker AAPL,MSFT,NVDA
-```
-
-You can also specify a `--ollama` flag to run the AI hedge fund using local LLMs.
+### 3. 安装依赖
 
 ```bash
-poetry run python src/main.py --ticker AAPL,MSFT,NVDA --ollama
+poetry install                    # 后端/核心
+cd app/frontend && pnpm install   # 或 npm install
 ```
 
-You can optionally specify the start and end dates to make decisions over a specific time period.
+### 4. 启动服务
+
+后端（FastAPI）：
 
 ```bash
-poetry run python src/main.py --ticker AAPL,MSFT,NVDA --start-date 2024-01-01 --end-date 2024-03-01
+cd app/backend
+poetry run uvicorn app.backend.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-#### Run the Backtester
+前端（Vite）：
+
 ```bash
-poetry run python src/backtester.py --ticker AAPL,MSFT,NVDA
+cd app/frontend
+pnpm dev      # 或 npm run dev
 ```
 
-**Example Output:**
-<img width="941" alt="Screenshot 2025-01-06 at 5 47 52 PM" src="https://github.com/user-attachments/assets/00e794ea-8628-44e6-9a84-8f8a31ad3b47" />
+访问 `http://localhost:5173` 即可体验多语言界面与流程编排。
 
+---
 
-Note: The `--ollama`, `--start-date`, and `--end-date` flags work for the backtester, as well!
+## ⌨️ 命令行示例
 
-### 🖥️ Web Application
+```bash
+poetry run python src/main.py \
+  --tickers AAPL,MSFT,NVDA \
+  --start-date 2024-01-01 \
+  --end-date 2024-03-01 \
+  --language CN \
+  --show-reasoning
+```
 
-The new way to run the AI Hedge Fund is through our web application that provides a user-friendly interface. This is recommended for users who prefer visual interfaces over command line tools.
+常用参数与原版一致：
 
-Please see detailed instructions on how to install and run the web application [here](https://github.com/virattt/ai-hedge-fund/tree/main/app).
+- `--tickers`：股票代码列表（必填，逗号分隔）
+- `--language`：输出语言（EN/CN/JA/KO/AR/FR/DE）
+- `--model`/`--model-provider`：指定云端模型
+- `--ollama`：使用本地 Ollama
+- `--show-reasoning`：展示详细推理
 
-<img width="1721" alt="Screenshot 2025-06-28 at 6 41 03 PM" src="https://github.com/user-attachments/assets/b95ab696-c9f4-416c-9ad1-51feb1f5374b" />
+回测命令：
 
+```bash
+poetry run python src/backtester.py \
+  --tickers TSLA,AMZN \
+  --start-date 2023-01-01 \
+  --end-date 2023-12-31 \
+  --language JA
+```
 
-## How to Contribute
+---
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+## 🌐 Web 端多语言体验
 
-**Important**: Please keep your pull requests small and focused.  This will make it easier to review and merge.
+- 「设置 → 语言」面板可切换 UI 语言；
+- 切换后前端 UI、流程面板、日志、弹窗文案实时变更；
+- 命令行和 Web 运行任务的分析报告会同步采用选择的语言；
 
-## Feature Requests
+已内置的翻译（可按需扩展）：
 
-If you have a feature request, please open an [issue](https://github.com/virattt/ai-hedge-fund/issues) and make sure it is tagged with `enhancement`.
+```
+EN · English
+CN · 简体中文
+JA · 日本語
+KO · 한국어
+AR · العربية
+FR · Français
+DE · Deutsch
+```
 
-## License
+继续扩展新语言时，仅需在 `app/frontend/src/locales/` 新增对应 JSON，并注册于 `language-context` 中即可。
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+---
+
+## 🔐 模型与 API 管理
+
+在 Web 控制台的「设置」可填写以下服务的密钥（同样支持多语言说明）：
+
+| 服务商      | 说明                                  |
+|-------------|---------------------------------------|
+| OpenAI      | GPT-4o / GPT-4o mini 等               |
+| Anthropic   | Claude 系列                           |
+| DeepSeek    | deepseek-chat / deepseek-reasoner     |
+| Groq        | Groq 托管模型（DeepSeek、Llama3 等）  |
+| Google      | Gemini 2.5 Flash / Pro                |
+| OpenRouter  | 聚合多家模型                          |
+| FinancialDatasets | 行业/财务数据，非必填            |
+
+### 使用本地 Ollama
+
+1. 安装并启动 Ollama
+2. Web 设置中开启「Use Ollama」，或 CLI 加 `--ollama`
+3. 拉取需要的模型，例如 `ollama pull llama3`
+
+---
+
+## ✅ 测试
+
+```bash
+poetry run pytest            # 后端/回测测试
+cd app/frontend && pnpm lint # 前端格式检查
+```
+
+---
+
+## 🤝 贡献与定制
+
+欢迎针对多语言或新功能提交 Issue / PR：
+
+1. Fork 仓库，新建分支 `feature/your-feature`
+2. 开发完成后确保测试通过
+3. 提交 PR 描述改动与语言支持情况
+
+如需扩展新的语言包，可以直接复制 `en.json` 为模版，翻译后在 `language-context.tsx` 注册即可。
+
+---
+
+## 📄 许可协议
+
+本项目基于原项目相同的 [MIT License](LICENSE) 许可发布。欢迎在遵循许可证的前提下自由使用、定制和商用。
+
+---
+
+## 🙏 鸣谢
+
+- 原项目作者 [virattt](https://github.com/virattt) 提供的开源基础设施
+- 所有参与翻译与体验优化的贡献者
+
+如果这个多语言版本对你有帮助，欢迎 **Star** 或分享，让更多团队受益。也期待你将实际使用反馈回社区，一起打磨更优秀的投研工具！
