@@ -1,6 +1,7 @@
 import { useFlowContext } from '@/contexts/flow-context';
 import { useNodeContext } from '@/contexts/node-context';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/contexts/language-context';
 import { useEffect, useState } from 'react';
 import { BacktestOutput } from './backtest-output';
 import { sortAgents } from './output-tab-utils';
@@ -14,6 +15,7 @@ export function OutputTab({ className }: OutputTabProps) {
   const { currentFlowId } = useFlowContext();
   const { getAgentNodeDataForFlow, getOutputNodeDataForFlow } = useNodeContext();
   const [updateTrigger, setUpdateTrigger] = useState(0);
+  const { t } = useTranslation();
   
   // Get current flow data
   const agentData = getAgentNodeDataForFlow(currentFlowId?.toString() || null);
@@ -49,9 +51,9 @@ export function OutputTab({ className }: OutputTabProps) {
       {/* Empty State */}
       {!outputData && sortedAgents.length === 0 && !isBacktestRun && (
         <div className="text-center py-8 text-muted-foreground">
-          No output to display. Run an analysis to see progress and results.
+          {t('agent.output.emptyState')}
         </div>
       )}
     </div>
   );
-} 
+}

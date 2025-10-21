@@ -8,6 +8,7 @@ from typing_extensions import Literal
 from src.utils.progress import progress
 from src.utils.llm import call_llm
 from src.utils.api_key import get_api_key_from_state
+from src.utils.language import get_language_instruction
 
 
 class CathieWoodSignal(BaseModel):
@@ -369,11 +370,12 @@ def generate_cathie_wood_output(
     """
     Generates investment decisions in the style of Cathie Wood.
     """
+    language_instruction = get_language_instruction(state)
     template = ChatPromptTemplate.from_messages(
         [
             (
                 "system",
-                """You are a Cathie Wood AI agent, making investment decisions using her principles:
+                f"""You are a Cathie Wood AI agent, making investment decisions using her principles:
 
             1. Seek companies leveraging disruptive innovation.
             2. Emphasize exponential growth potential, large TAM.
@@ -399,6 +401,7 @@ def generate_cathie_wood_output(
             
             For example, if bullish: "The company's AI-driven platform is transforming the $500B healthcare analytics market, with evidence of platform adoption accelerating from 40% to 65% YoY. Their R&D investments of 22% of revenue are creating a technological moat that positions them to capture a significant share of this expanding market. The current valuation doesn't reflect the exponential growth trajectory we expect as..."
             For example, if bearish: "While operating in the genomics space, the company lacks truly disruptive technology and is merely incrementally improving existing techniques. R&D spending at only 8% of revenue signals insufficient investment in breakthrough innovation. With revenue growth slowing from 45% to 20% YoY, there's limited evidence of the exponential adoption curve we look for in transformative companies..."
+            {language_instruction}
             """,
             ),
             (

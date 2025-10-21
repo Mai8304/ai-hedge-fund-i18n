@@ -1,13 +1,15 @@
-import { AppNode } from "@/nodes/types";
-import { Agent, getAgents } from "./agents";
+import { AppNode } from '@/nodes/types';
+import { Agent, getAgents } from './agents';
+import { translate } from './translations';
+import type { SupportedLanguage } from '@/locales';
 
 // Map of sidebar item names to node creation functions
 export interface NodeTypeDefinition {
-  createNode: (position: { x: number, y: number }) => AppNode;
+  createNode: (position: { x: number; y: number }) => AppNode;
 }
 
-// Cache for node type definitions to avoid repeated API calls
-let nodeTypeDefinitionsCache: Record<string, NodeTypeDefinition> | null = null;
+// Cache for node type definitions to avoid repeated API calls per language
+const nodeTypeDefinitionsCache: Partial<Record<SupportedLanguage, Record<string, NodeTypeDefinition>>> = {};
 
 // Utility function to generate unique short ID suffix
 const generateUniqueIdSuffix = (): string => {
@@ -40,89 +42,104 @@ export const extractBaseAgentKey = (uniqueId: string): string => {
 };
 
 // Define base node creation functions (non-agent nodes)
-const baseNodeTypeDefinitions: Record<string, NodeTypeDefinition> = {
-  "Portfolio Input": {
-    createNode: (position: { x: number, y: number }): AppNode => ({
+const createBaseNodeDefinitions = (language: SupportedLanguage): Record<string, NodeTypeDefinition> => ({
+  'Portfolio Input': {
+    createNode: (position: { x: number; y: number }): AppNode => ({
       id: `portfolio-start-node_${generateUniqueIdSuffix()}`,
-      type: "portfolio-start-node",
+      type: 'portfolio-start-node',
       position,
       data: {
-        name: "Portfolio Input",
-        description: "Enter your portfolio including tickers, shares, and prices. Connect this node to Analysts to generate insights.",
-        status: "Idle",
+        name: translate('nodes.portfolioInput.name', language, 'Portfolio Input'),
+        description: translate(
+          'nodes.portfolioInput.description',
+          language,
+          'Enter your portfolio including tickers, shares, and prices. Connect this node to Analysts to generate insights.',
+        ),
+        status: 'Idle',
       },
     }),
   },
-  "Portfolio Manager": {
-    createNode: (position: { x: number, y: number }): AppNode => ({
+  'Portfolio Manager': {
+    createNode: (position: { x: number; y: number }): AppNode => ({
       id: `portfolio_manager_${generateUniqueIdSuffix()}`,
-      type: "portfolio-manager-node",
+      type: 'portfolio-manager-node',
       position,
       data: {
-        name: "Portfolio Manager",
-        description: "Generates investment decisions based on input from Analysts.",
-        status: "Idle",
+        name: translate('nodes.portfolioManager.name', language, 'Portfolio Manager'),
+        description: translate(
+          'nodes.portfolioManager.description',
+          language,
+          'Generates investment decisions based on input from Analysts.',
+        ),
+        status: 'Idle',
       },
     }),
   },
-  "Stock Input": {
-    createNode: (position: { x: number, y: number }): AppNode => ({
+  'Stock Input': {
+    createNode: (position: { x: number; y: number }): AppNode => ({
       id: `stock-analyzer-node_${generateUniqueIdSuffix()}`,
-      type: "stock-analyzer-node",
+      type: 'stock-analyzer-node',
       position,
       data: {
-        name: "Stock Input",
-        description: "Enter individual stocks and connect this node to Analysts to generate insights.",
-        status: "Idle",
+        name: translate('nodes.stockInput.name', language, 'Stock Input'),
+        description: translate(
+          'nodes.stockInput.description',
+          language,
+          'Enter individual stocks and connect this node to Analysts to generate insights.',
+        ),
+        status: 'Idle',
       },
     }),
   },
-};
+});
 
 /**
  * Get all node type definitions, including agents fetched from the backend
  */
-const getNodeTypeDefinitions = async (): Promise<Record<string, NodeTypeDefinition>> => {
-  if (nodeTypeDefinitionsCache) {
-    return nodeTypeDefinitionsCache;
+const getNodeTypeDefinitions = async (language: SupportedLanguage): Promise<Record<string, NodeTypeDefinition>> => {
+  if (nodeTypeDefinitionsCache[language]) {
+    return nodeTypeDefinitionsCache[language]!;
   }
 
   const agents = await getAgents();
-  
-  // Create agent node definitions
+
   const agentNodeDefinitions = agents.reduce((acc: Record<string, NodeTypeDefinition>, agent: Agent) => {
     acc[agent.display_name] = {
-      createNode: (position: { x: number, y: number }): AppNode => ({
+      createNode: (position: { x: number; y: number }): AppNode => ({
         id: `${agent.key}_${generateUniqueIdSuffix()}`,
-        type: "agent-node",
+        type: 'agent-node',
         position,
         data: {
           name: agent.display_name,
-          description: agent.investing_style || "",
-          status: "Idle",
+          description: translate(
+            `analysts.${agent.key}.investingStyle`,
+            language,
+            agent.investing_style || '',
+          ),
+          status: 'Idle',
         },
       }),
     };
     return acc;
   }, {});
 
-  // Combine base and agent definitions
-  nodeTypeDefinitionsCache = {
-    ...baseNodeTypeDefinitions,
+  const definitions = {
+    ...createBaseNodeDefinitions(language),
     ...agentNodeDefinitions,
   };
 
-  return nodeTypeDefinitionsCache;
+  nodeTypeDefinitionsCache[language] = definitions;
+  return definitions;
 };
 
-export async function getNodeTypeDefinition(componentName: string): Promise<NodeTypeDefinition | null> {
-  const nodeTypeDefinitions = await getNodeTypeDefinitions();
+export async function getNodeTypeDefinition(componentName: string, language: SupportedLanguage): Promise<NodeTypeDefinition | null> {
+  const nodeTypeDefinitions = await getNodeTypeDefinitions(language);
   return nodeTypeDefinitions[componentName] || null;
 }
 
 // Get the node ID that would be generated for a component
-export async function getNodeIdForComponent(componentName: string): Promise<string | null> {
-  const nodeTypeDefinition = await getNodeTypeDefinition(componentName);
+export async function getNodeIdForComponent(componentName: string, language: SupportedLanguage): Promise<string | null> {
+  const nodeTypeDefinition = await getNodeTypeDefinition(componentName, language);
   if (!nodeTypeDefinition) {
     return null;
   }
@@ -135,6 +152,12 @@ export async function getNodeIdForComponent(componentName: string): Promise<stri
 /**
  * Clear the node type definitions cache - useful for testing or when you want to force a refresh
  */
-export const clearNodeTypeDefinitionsCache = () => {
-  nodeTypeDefinitionsCache = null;
-}; 
+export const clearNodeTypeDefinitionsCache = (language?: SupportedLanguage) => {
+  if (language) {
+    delete nodeTypeDefinitionsCache[language];
+  } else {
+    (Object.keys(nodeTypeDefinitionsCache) as SupportedLanguage[]).forEach((lang) => {
+      delete nodeTypeDefinitionsCache[lang];
+    });
+  }
+};

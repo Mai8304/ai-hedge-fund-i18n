@@ -1,10 +1,11 @@
+import { useEffect, useState, ReactNode } from 'react';
 import { ComponentGroup, getComponentGroups } from '@/data/sidebar-components';
 import { useComponentGroups } from '@/hooks/use-component-groups';
 import { useResizable } from '@/hooks/use-resizable';
 import { cn } from '@/lib/utils';
-import { ReactNode, useEffect, useState } from 'react';
 import { ComponentActions } from './component-actions';
 import { ComponentList } from './component-list';
+import { useTranslation } from '@/contexts/language-context';
 
 interface RightSidebarProps {
   children?: ReactNode;
@@ -34,13 +35,14 @@ export function RightSidebar({
   // State for loading component groups
   const [componentGroups, setComponentGroups] = useState<ComponentGroup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { language } = useTranslation();
   
   // Load component groups on mount
   useEffect(() => {
     const loadComponentGroups = async () => {
       try {
         setIsLoading(true);
-        const groups = await getComponentGroups();
+        const groups = await getComponentGroups(language);
         setComponentGroups(groups);
       } catch (error) {
         console.error('Failed to load component groups:', error);
@@ -50,7 +52,7 @@ export function RightSidebar({
     };
     
     loadComponentGroups();
-  }, []);
+  }, [language]);
   
   const { 
     searchQuery, 

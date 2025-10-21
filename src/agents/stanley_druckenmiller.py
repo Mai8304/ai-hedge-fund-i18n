@@ -14,6 +14,7 @@ import json
 from typing_extensions import Literal
 from src.utils.progress import progress
 from src.utils.llm import call_llm
+from src.utils.language import get_language_instruction
 import statistics
 from src.utils.api_key import get_api_key_from_state
 
@@ -535,11 +536,12 @@ def generate_druckenmiller_output(
     """
     Generates a JSON signal in the style of Stanley Druckenmiller.
     """
+    language_instruction = get_language_instruction(state)
     template = ChatPromptTemplate.from_messages(
         [
             (
               "system",
-              """You are a Stanley Druckenmiller AI agent, making investment decisions using his principles:
+              f"""You are a Stanley Druckenmiller AI agent, making investment decisions using his principles:
             
               1. Seek asymmetric risk-reward opportunities (large upside, limited downside).
               2. Emphasize growth, momentum, and market sentiment.
@@ -564,6 +566,7 @@ def generate_druckenmiller_output(
               
               For example, if bullish: "The company shows exceptional momentum with revenue accelerating from 22% to 35% YoY and the stock up 28% over the past three months. Risk-reward is highly asymmetric with 70% upside potential based on FCF multiple expansion and only 15% downside risk given the strong balance sheet with 3x cash-to-debt. Insider buying and positive market sentiment provide additional tailwinds..."
               For example, if bearish: "Despite recent stock momentum, revenue growth has decelerated from 30% to 12% YoY, and operating margins are contracting. The risk-reward proposition is unfavorable with limited 10% upside potential against 40% downside risk. The competitive landscape is intensifying, and insider selling suggests waning confidence. I'm seeing better opportunities elsewhere with more favorable setups..."
+              {language_instruction}
               """,
             ),
             (

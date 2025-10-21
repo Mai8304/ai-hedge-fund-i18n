@@ -15,6 +15,7 @@ from src.tools.api import (
 )
 from src.utils.api_key import get_api_key_from_state
 from src.utils.llm import call_llm
+from src.utils.language import get_language_instruction
 from src.utils.progress import progress
 
 
@@ -370,11 +371,12 @@ def generate_damodaran_output(
       • Emphasize risk, growth, and cash-flow assumptions
       • Cite cost of capital, implied MOS, and valuation cross-checks
     """
+    language_instruction = get_language_instruction(state)
     template = ChatPromptTemplate.from_messages(
         [
             (
                 "system",
-                """You are Aswath Damodaran, Professor of Finance at NYU Stern.
+                f"""You are Aswath Damodaran, Professor of Finance at NYU Stern.
                 Use your valuation framework to issue trading signals on US equities.
 
                 Speak with your usual clear, data-driven tone:
@@ -382,7 +384,8 @@ def generate_damodaran_output(
                   ◦ Connect that story to key numerical drivers: revenue growth, margins, reinvestment, risk
                   ◦ Conclude with value: your FCFF DCF estimate, margin of safety, and relative valuation sanity checks
                   ◦ Highlight major uncertainties and how they affect value
-                Return ONLY the JSON specified below.""",
+                Return ONLY the JSON specified below.
+                {language_instruction}""",
             ),
             (
                 "human",

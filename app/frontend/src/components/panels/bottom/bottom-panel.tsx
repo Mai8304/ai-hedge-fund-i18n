@@ -1,4 +1,5 @@
 import { useLayoutContext } from '@/contexts/layout-context';
+import { useTranslation } from '@/contexts/language-context';
 import { useResizable } from '@/hooks/use-resizable';
 import { cn } from '@/lib/utils';
 import { FileText, X } from 'lucide-react';
@@ -22,6 +23,7 @@ export function BottomPanel({
   onHeightChange,
 }: BottomPanelProps) {
   const { currentBottomTab, setBottomPanelTab } = useLayoutContext();
+  const { t } = useTranslation();
   
   // Use our custom hooks for vertical resizing
   const { height, isDragging, elementRef, startResize } = useResizable({
@@ -69,7 +71,7 @@ export function BottomPanel({
                 className="flex items-center gap-2 px-3 py-1.5 text-sm data-[state=active]:active-item text-muted-foreground"
               >
                 <FileText size={14} />
-                Output
+                {t('agent.output.open')}
               </TabsTrigger>
             </TabsList>
             
@@ -78,7 +80,7 @@ export function BottomPanel({
               size="icon"
               onClick={onToggleCollapse}
               className="h-6 w-6 text-primary hover-bg"
-              aria-label="Close panel"
+              aria-label={t('bottomPanel.actions.close')}
             >
               <X size={14} />
             </Button>

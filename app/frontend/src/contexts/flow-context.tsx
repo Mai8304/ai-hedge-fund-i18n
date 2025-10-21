@@ -6,6 +6,7 @@ import { flowService } from '@/services/flow-service';
 import { Flow } from '@/types/flow';
 import { MarkerType, ReactFlowInstance, useReactFlow, XYPosition } from '@xyflow/react';
 import { createContext, ReactNode, useCallback, useContext, useState } from 'react';
+import { useTranslation } from '@/contexts/language-context';
 
 interface FlowContextType {
   addComponentToFlow: (componentName: string) => Promise<void>;
@@ -37,6 +38,7 @@ export function FlowProvider({ children }: FlowProviderProps) {
   const [currentFlowId, setCurrentFlowId] = useState<number | null>(null);
   const [currentFlowName, setCurrentFlowName] = useState('Untitled Flow');
   const [isUnsaved, setIsUnsaved] = useState(false);
+  const { language } = useTranslation();
 
   // Calculate viewport center position with optional randomness
   const getViewportPosition = useCallback((addRandomness = false): XYPosition => {
@@ -216,7 +218,7 @@ export function FlowProvider({ children }: FlowProviderProps) {
   // Add a single node to the flow
   const addSingleNodeToFlow = useCallback(async (componentName: string) => {
     try {
-      const nodeTypeDefinition = await getNodeTypeDefinition(componentName);
+      const nodeTypeDefinition = await getNodeTypeDefinition(componentName, language);
       if (!nodeTypeDefinition) {
         console.warn(`No node type definition found for component: ${componentName}`);
         return;
@@ -229,7 +231,7 @@ export function FlowProvider({ children }: FlowProviderProps) {
     } catch (error) {
       console.error(`Failed to add component ${componentName} to flow:`, error);
     }
-  }, [reactFlowInstance, getViewportPosition, markAsUnsaved]);
+  }, [reactFlowInstance, getViewportPosition, markAsUnsaved, language]);
 
   // Add a multi node (group of nodes with edges) to the flow
   const addMultipleNodesToFlow = useCallback(async (name: string) => {
@@ -266,7 +268,7 @@ export function FlowProvider({ children }: FlowProviderProps) {
       const newNodes = await Promise.all(
         multiNodeDefinition.nodes.map(async (nodeConfig) => {
           try {
-            const nodeTypeDefinition = await getNodeTypeDefinition(nodeConfig.componentName);
+            const nodeTypeDefinition = await getNodeTypeDefinition(nodeConfig.componentName, language);
             if (!nodeTypeDefinition) {
               console.warn(`No node type definition found for: ${nodeConfig.componentName}`);
               return null;
@@ -328,7 +330,7 @@ export function FlowProvider({ children }: FlowProviderProps) {
     } catch (error) {
       console.error(`Failed to add multi-node component ${name} to flow:`, error);
     }
-  }, [reactFlowInstance, getViewportPosition, markAsUnsaved]);
+  }, [reactFlowInstance, getViewportPosition, markAsUnsaved, language]);
 
   // Main entry point - route to single node or multi node
   const addComponentToFlow = useCallback(async (componentName: string) => {

@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from typing_extensions import Literal
 from src.utils.progress import progress
 from src.utils.llm import call_llm
+from src.utils.language import get_language_instruction
 
 
 class PortfolioDecision(BaseModel):
@@ -209,6 +210,7 @@ def generate_trading_decision(
     compact_allowed = {t: allowed_actions_full[t] for t in tickers_for_llm}
 
     # Minimal prompt template
+    language_instruction = get_language_instruction(state)
     template = ChatPromptTemplate.from_messages(
         [
             (
@@ -216,7 +218,8 @@ def generate_trading_decision(
                 "You are a portfolio manager.\n"
                 "Inputs per ticker: analyst signals and allowed actions with max qty (already validated).\n"
                 "Pick one allowed action per ticker and a quantity ≤ the max. "
-                "Keep reasoning very concise (max 100 chars). No cash or margin math. Return JSON only."
+                "Keep reasoning very concise (max 100 chars). No cash or margin math. Return JSON only.\n"
+                f"{language_instruction}"
             ),
             (
                 "human",

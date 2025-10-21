@@ -8,6 +8,7 @@ from src.tools.api import get_financial_metrics, get_market_cap, search_line_ite
 from src.utils.llm import call_llm
 from src.utils.progress import progress
 from src.utils.api_key import get_api_key_from_state
+from src.utils.language import get_language_instruction
 
 
 class WarrenBuffettSignal(BaseModel):
@@ -766,6 +767,7 @@ def generate_buffett_output(
         "margin_of_safety": analysis_data.get("margin_of_safety"),
     }
 
+    language_instruction = get_language_instruction(state)
     template = ChatPromptTemplate.from_messages(
         [
             (
@@ -792,7 +794,8 @@ def generate_buffett_output(
                 "- 30-49%: Outside my expertise or concerning fundamentals\n"
                 "- 10-29%: Poor business or significantly overvalued\n"
                 "\n"
-                "Keep reasoning under 120 characters. Do not invent data. Return JSON only."
+                "Keep reasoning under 120 characters. Do not invent data. Return JSON only.\n"
+                f"{language_instruction}"
             ),
             (
                 "human",

@@ -34,6 +34,7 @@ def test_long_short_strategy_partial_exits():
         model_provider="test-provider",
         selected_analysts=None,
         initial_margin_requirement=margin_requirement,
+        language="EN",
     )
 
     performance_metrics = engine.run_backtest()
@@ -112,6 +113,7 @@ def test_long_short_strategy_full_liquidation_to_cash():
         model_provider="test-provider",
         selected_analysts=None,
         initial_margin_requirement=margin_requirement,
+        language="EN",
     )
 
     performance_metrics = engine.run_backtest()
@@ -188,6 +190,7 @@ def test_long_short_strategy_directional_flip_on_ticker():
         model_provider="test-provider",
         selected_analysts=None,
         initial_margin_requirement=margin_requirement,
+        language="EN",
     )
 
     performance_metrics = engine.run_backtest()
@@ -265,6 +268,7 @@ def test_long_short_strategy_dca_both_sides():
         model_provider="test-provider",
         selected_analysts=None,
         initial_margin_requirement=margin_requirement,
+        language="EN",
     )
 
     performance_metrics = engine.run_backtest()
@@ -308,5 +312,3 @@ def test_long_short_strategy_dca_both_sides():
     assert final_portfolio_value == expected_total_value
     # Mixed book remains -> non-zero position value magnitude
     assert abs(portfolio_summary["total_position_value"]) > 0.0
-
-

@@ -8,6 +8,7 @@ from typing_extensions import Literal
 from src.utils.progress import progress
 from src.utils.llm import call_llm
 from src.utils.api_key import get_api_key_from_state
+from src.utils.language import get_language_instruction
 
 class CharlieMungerSignal(BaseModel):
     signal: Literal["bullish", "bearish", "neutral"]
@@ -821,11 +822,13 @@ def generate_munger_output(
     confidence_hint: int,
 ) -> CharlieMungerSignal:
     facts_bundle = make_munger_facts_bundle(analysis_data)
+    language_instruction = get_language_instruction(state)
     template = ChatPromptTemplate.from_messages([
         ("system",
          "You are Charlie Munger. Decide bullish, bearish, or neutral using only the facts. "
          "Return JSON only. Keep reasoning under 120 characters. "
-         "Use the provided confidence exactly; do not change it."),
+         "Use the provided confidence exactly; do not change it. "
+         f"{language_instruction}"),
         ("human",
          "Ticker: {ticker}\n"
          "Facts:\n{facts}\n"

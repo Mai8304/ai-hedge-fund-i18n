@@ -52,25 +52,42 @@ export function PortfolioManagerNode({
 
   // Load models on mount
   useEffect(() => {
-    const loadModels = async () => {
+    let isMounted = true;
+
+    const loadModels = async (retry = true) => {
       try {
         const [models, defaultModel] = await Promise.all([
           getModels(),
           getDefaultModel()
         ]);
+
+        if (!isMounted) return;
+
+        if (models.length === 0) {
+          if (retry) {
+            setTimeout(() => loadModels(false), 1500);
+          }
+          return;
+        }
+
         setAvailableModels(models);
-        
-        // Set default model if no model is currently selected
+
         if (!selectedModel && defaultModel) {
           setSelectedModel(defaultModel);
         }
       } catch (error) {
         console.error('Failed to load models:', error);
-        // Keep empty array as fallback
+        if (retry && isMounted) {
+          setTimeout(() => loadModels(false), 1500);
+        }
       }
     };
 
     loadModels();
+
+    return () => {
+      isMounted = false;
+    };
   }, [setAvailableModels, selectedModel, setSelectedModel]);
 
   // Update the node context when the model changes

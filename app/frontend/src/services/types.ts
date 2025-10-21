@@ -43,6 +43,7 @@ export interface BaseHedgeFundRequest {
   model_provider?: ModelProvider;
   margin_requirement?: number;
   portfolio_positions?: PortfolioPosition[];
+  language?: 'EN' | 'CN' | 'JA' | 'KO' | 'AR' | 'FR' | 'DE';
 }
 
 export interface HedgeFundRequest extends BaseHedgeFundRequest {

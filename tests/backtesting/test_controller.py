@@ -21,6 +21,7 @@ def test_agent_controller_normalizes_and_snapshots(portfolio):
         model_name="m",
         model_provider="p",
         selected_analysts=["x"],
+        language="EN",
     )
 
     # Decisions normalized for all tickers
@@ -31,5 +32,4 @@ def test_agent_controller_normalizes_and_snapshots(portfolio):
     assert out["decisions"]["MSFT"]["quantity"] == 0.0
     # Analyst signals are passed through
     assert "agentA" in out["analyst_signals"]
-
 

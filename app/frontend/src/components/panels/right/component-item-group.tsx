@@ -12,7 +12,7 @@ export function ComponentItemGroup({
   group, 
   activeItem
 }: ComponentItemGroupProps) {
-  const { name, icon: Icon, iconColor, items } = group;
+  const { name, label, icon: Icon, iconColor, items } = group;
   const { addComponentToFlow } = useFlowContext();
 
   const handleItemClick = async (componentName: string) => {
@@ -28,7 +28,7 @@ export function ComponentItemGroup({
       <AccordionTrigger className="px-4 py-2 text-sm hover-bg hover:no-underline">
         <div className="flex items-center gap-2">
           <Icon size={16} className={iconColor} />
-          <span className="capitalize">{name}</span>
+          <span className="capitalize">{label}</span>
         </div>
       </AccordionTrigger>
       <AccordionContent className="px-4">
@@ -37,7 +37,7 @@ export function ComponentItemGroup({
             <ComponentItem 
               key={item.name}
               icon={item.icon} 
-              label={item.name} 
+              label={item.label} 
               isActive={activeItem === item.name}
               onClick={() => handleItemClick(item.name)}
             />

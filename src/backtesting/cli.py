@@ -35,6 +35,13 @@ def main() -> int:
     parser.add_argument("--analysts", type=str, required=False)
     parser.add_argument("--analysts-all", action="store_true")
     parser.add_argument("--ollama", action="store_true")
+    parser.add_argument(
+        "--language",
+        type=str,
+        choices=["EN", "CN", "JA", "KO", "AR", "FR", "DE"],
+        default="EN",
+        help="Language for agent reasoning outputs (EN, CN, JA, KO, AR, FR, DE). Defaults to EN.",
+    )
 
     args = parser.parse_args()
     init(autoreset=True)
@@ -138,6 +145,7 @@ def main() -> int:
         model_provider=model_provider,
         selected_analysts=selected_analysts,
         initial_margin_requirement=args.margin_requirement,
+        language=args.language,
     )
 
     metrics = engine.run_backtest()
@@ -166,7 +174,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
-
 
 

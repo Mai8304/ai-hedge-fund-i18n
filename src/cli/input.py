@@ -221,6 +221,7 @@ class CLIInputs:
     margin_requirement: float
     show_reasoning: bool = False
     show_agent_graph: bool = False
+    language: str = "EN"
     raw_args: Optional[argparse.Namespace] = None
 
 
@@ -259,6 +260,13 @@ def parse_cli_inputs(
         parser.add_argument("--show-reasoning", action="store_true", help="Show reasoning from each agent")
     if include_graph_flag:
         parser.add_argument("--show-agent-graph", action="store_true", help="Show the agent graph")
+    parser.add_argument(
+        "--language",
+        type=str,
+        choices=["EN", "CN", "JA", "KO", "AR", "FR", "DE"],
+        default="EN",
+        help="Language for agent reasoning outputs (EN, CN, JA, KO, AR, FR, DE). Defaults to EN.",
+    )
 
     args = parser.parse_args()
 
@@ -282,7 +290,6 @@ def parse_cli_inputs(
         margin_requirement=getattr(args, "margin_requirement", 0.0),
         show_reasoning=getattr(args, "show_reasoning", False),
         show_agent_graph=getattr(args, "show_agent_graph", False),
+        language=getattr(args, "language", "EN"),
         raw_args=args,
     )
-
-

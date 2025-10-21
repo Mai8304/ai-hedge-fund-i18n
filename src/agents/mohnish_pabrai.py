@@ -7,6 +7,7 @@ import json
 from typing_extensions import Literal
 from src.utils.progress import progress
 from src.utils.llm import call_llm
+from src.utils.language import get_language_instruction
 from src.utils.api_key import get_api_key_from_state
 
 
@@ -310,10 +311,11 @@ def generate_pabrai_output(
     agent_id: str,
 ) -> MohnishPabraiSignal:
     """Generate Pabrai-style decision focusing on low risk, high uncertainty bets and cloning."""
+    language_instruction = get_language_instruction(state)
     template = ChatPromptTemplate.from_messages([
         (
           "system",
-          """You are Mohnish Pabrai. Apply my value investing philosophy:
+          f"""You are Mohnish Pabrai. Apply my value investing philosophy:
 
           - Heads I win; tails I don't lose much: prioritize downside protection first.
           - Buy businesses with simple, understandable models and durable moats.
@@ -324,6 +326,7 @@ def generate_pabrai_output(
           - Avoid leverage, complexity, and fragile balance sheets.
 
             Provide candid, checklist-driven reasoning, with emphasis on capital preservation and expected mispricing.
+            {language_instruction}
             """,
         ),
         (

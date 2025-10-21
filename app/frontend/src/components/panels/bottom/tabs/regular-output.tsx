@@ -5,15 +5,18 @@ import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { getActionColor, getDisplayName, getSignalColor, getStatusIcon } from './output-tab-utils';
 import { ReasoningContent } from './reasoning-content';
+import { useTranslation } from '@/contexts/language-context';
+
+type TranslateFn = ReturnType<typeof useTranslation>['t'];
 
 // Progress Section Component
-function ProgressSection({ sortedAgents }: { sortedAgents: [string, any][] }) {
+function ProgressSection({ sortedAgents, t }: { sortedAgents: [string, any][]; t: TranslateFn }) {
   if (sortedAgents.length === 0) return null;
 
   return (
     <Card className="bg-transparent mb-4">
       <CardHeader>
-        <CardTitle className="text-lg">Progress</CardTitle>
+        <CardTitle className="text-lg">{t('agent.output.progress.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-1">
@@ -46,22 +49,22 @@ function ProgressSection({ sortedAgents }: { sortedAgents: [string, any][] }) {
 }
 
 // Summary Section Component
-function SummarySection({ outputData }: { outputData: any }) {
+function SummarySection({ outputData, t }: { outputData: any; t: TranslateFn }) {
   if (!outputData) return null;
 
   return (
     <Card className="bg-transparent mb-4">
       <CardHeader>
-        <CardTitle className="text-lg">Summary</CardTitle>
+        <CardTitle className="text-lg">{t('agent.output.summary.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Ticker</TableHead>
-              <TableHead>Action</TableHead>
-              <TableHead>Quantity</TableHead>
-              <TableHead>Confidence</TableHead>
+              <TableHead>{t('agent.output.summary.columns.ticker')}</TableHead>
+              <TableHead>{t('agent.output.summary.columns.action')}</TableHead>
+              <TableHead>{t('agent.output.summary.columns.quantity')}</TableHead>
+              <TableHead>{t('agent.output.summary.columns.confidence')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -70,7 +73,7 @@ function SummarySection({ outputData }: { outputData: any }) {
                 <TableCell className="font-medium">{ticker}</TableCell>
                 <TableCell>
                   <span className={cn("font-medium", getActionColor(decision.action || ''))}>
-                    {decision.action?.toUpperCase() || 'UNKNOWN'}
+                    {decision.action?.toUpperCase() || t('agent.output.unknown')}
                   </span>
                 </TableCell>
                 <TableCell>{decision.quantity || 0}</TableCell>
@@ -85,7 +88,7 @@ function SummarySection({ outputData }: { outputData: any }) {
 }
 
 // Analysis Results Section Component
-function AnalysisResultsSection({ outputData }: { outputData: any }) {
+function AnalysisResultsSection({ outputData, t }: { outputData: any; t: TranslateFn }) {
   // Always call hooks at the top of the function
   const [selectedTicker, setSelectedTicker] = useState<string>('');
   
@@ -106,7 +109,7 @@ function AnalysisResultsSection({ outputData }: { outputData: any }) {
   return (
     <Card className="bg-transparent">
       <CardHeader>
-        <CardTitle className="text-lg">Analysis</CardTitle>
+        <CardTitle className="text-lg">{t('agent.output.analysis')}</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs value={selectedTicker} onValueChange={setSelectedTicker} className="w-full">
@@ -124,17 +127,17 @@ function AnalysisResultsSection({ outputData }: { outputData: any }) {
           
           {tickers.map((ticker) => {
             const decision = outputData.decisions![ticker];
-            
+
             return (
               <TabsContent key={ticker} value={ticker} className="space-y-4">
                 {/* Agent Analysis */}
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Agent</TableHead>
-                      <TableHead>Signal</TableHead>
-                      <TableHead>Confidence</TableHead>
-                      <TableHead>Reasoning</TableHead>
+                      <TableHead>{t('agent.output.analysis.columns.agent')}</TableHead>
+                      <TableHead>{t('agent.output.analysis.columns.signal')}</TableHead>
+                      <TableHead>{t('agent.output.analysis.columns.confidence')}</TableHead>
+                      <TableHead>{t('agent.output.analysis.columns.reasoning')}</TableHead>
                     </TableRow>
                   </TableHeader>
                                      <TableBody>
@@ -144,9 +147,21 @@ function AnalysisResultsSection({ outputData }: { outputData: any }) {
                        )
                        .sort(([agentA], [agentB]) => agentA.localeCompare(agentB))
                        .map(([agent, signals]: [string, any]) => {
-                         const signal = signals[ticker];
-                         const signalType = signal.signal?.toUpperCase() || 'UNKNOWN';
-                         const signalColor = getSignalColor(signalType);
+                        const signal = signals[ticker];
+                        const signalType = signal.signal?.toUpperCase() || 'UNKNOWN';
+                        const signalColor = getSignalColor(signalType);
+                        const signalLabel = (() => {
+                          switch (signalType) {
+                            case 'BULLISH':
+                              return t('signals.bullish');
+                            case 'BEARISH':
+                              return t('signals.bearish');
+                            case 'NEUTRAL':
+                              return t('signals.neutral');
+                            default:
+                              return signalType === 'UNKNOWN' ? t('agent.output.unknown') : signalType;
+                          }
+                        })();
                         
                         return (
                           <TableRow key={agent}>
@@ -155,7 +170,7 @@ function AnalysisResultsSection({ outputData }: { outputData: any }) {
                             </TableCell>
                             <TableCell>
                               <span className={cn("font-medium", signalColor)}>
-                                {signalType}
+                                {signalLabel}
                               </span>
                             </TableCell>
                             <TableCell>{signal.confidence || 0}%</TableCell>
@@ -172,30 +187,30 @@ function AnalysisResultsSection({ outputData }: { outputData: any }) {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Property</TableHead>
-                      <TableHead>Value</TableHead>
+                      <TableHead>{t('agent.output.analysis.details.property')}</TableHead>
+                      <TableHead>{t('agent.output.analysis.details.value')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     <TableRow>
-                      <TableCell className="font-medium">Action</TableCell>
+                      <TableCell className="font-medium">{t('agent.output.summary.columns.action')}</TableCell>
                       <TableCell>
                         <span className={cn("font-medium", getActionColor(decision.action || ''))}>
-                          {decision.action?.toUpperCase() || 'UNKNOWN'}
+                          {decision.action?.toUpperCase() || t('agent.output.unknown')}
                         </span>
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell className="font-medium">Quantity</TableCell>
+                      <TableCell className="font-medium">{t('agent.output.summary.columns.quantity')}</TableCell>
                       <TableCell>{decision.quantity || 0}</TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell className="font-medium">Confidence</TableCell>
+                      <TableCell className="font-medium">{t('agent.output.summary.columns.confidence')}</TableCell>
                       <TableCell>{decision.confidence?.toFixed(1) || 0}%</TableCell>
                     </TableRow>
                     {decision.reasoning && (
                       <TableRow>
-                        <TableCell className="font-medium">Reasoning</TableCell>
+                        <TableCell className="font-medium">{t('agent.output.analysis.columns.reasoning')}</TableCell>
                         <TableCell className="max-w-md">
                           <ReasoningContent content={decision.reasoning} />
                         </TableCell>
@@ -220,11 +235,13 @@ export function RegularOutput({
   sortedAgents: [string, any][]; 
   outputData: any; 
 }) {
+  const { t } = useTranslation();
+
   return (
     <>
-      <ProgressSection sortedAgents={sortedAgents} />
-      <SummarySection outputData={outputData} />
-      <AnalysisResultsSection outputData={outputData} />
+      <ProgressSection sortedAgents={sortedAgents} t={t} />
+      <SummarySection outputData={outputData} t={t} />
+      <AnalysisResultsSection outputData={outputData} t={t} />
     </>
   );
-} 
+}

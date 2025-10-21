@@ -14,6 +14,7 @@ import { type AgentNode } from '../types';
 import { getStatusColor } from '../utils';
 import { AgentOutputDialog } from './agent-output-dialog';
 import { NodeShell } from './node-shell';
+import { useTranslation } from '@/contexts/language-context';
 
 export function AgentNode({
   data,
@@ -21,6 +22,7 @@ export function AgentNode({
   id,
   isConnectable,
 }: NodeProps<AgentNode>) {
+  const { t } = useTranslation();
   const { currentFlowId } = useFlowContext();
   const { getAgentNodeDataForFlow, setAgentModel, getAgentModel } = useNodeContext();
   
@@ -43,17 +45,34 @@ export function AgentNode({
 
   // Load models on mount
   useEffect(() => {
-    const loadModels = async () => {
+    let isMounted = true;
+
+    const loadModels = async (retry = true) => {
       try {
         const models = await getModels();
+        if (!isMounted) return;
+
+        if (models.length === 0) {
+          if (retry) {
+            setTimeout(() => loadModels(false), 1500);
+          }
+          return;
+        }
+
         setAvailableModels(models);
       } catch (error) {
         console.error('Failed to load models:', error);
-        // Keep empty array as fallback
+        if (retry && isMounted) {
+          setTimeout(() => loadModels(false), 1500);
+        }
       }
     };
-    
+
     loadModels();
+
+    return () => {
+      isMounted = false;
+    };
   }, [setAvailableModels]);
 
   // Update the node context when the model changes
@@ -80,7 +99,7 @@ export function AgentNode({
       isConnectable={isConnectable}
       icon={<Bot className="h-5 w-5" />}
       iconColor={getStatusColor(status)}
-      name={data.name || "Agent"}
+      name={data.name || t('agentNode.name')}
       description={data.description}
       status={status}
     >
@@ -88,7 +107,7 @@ export function AgentNode({
         <div className="border-t border-border p-3">
           <div className="flex flex-col gap-2">
             <div className="text-subtitle text-primary flex items-center gap-1">
-              Status
+              {t('agentNode.status.label')}
             </div>
 
             <div className={cn(
@@ -107,25 +126,25 @@ export function AgentNode({
             <Accordion type="single" collapsible>
               <AccordionItem value="advanced" className="border-none">
                 <AccordionTrigger className="!text-subtitle text-primary">
-                  Advanced
+                  {t('agentNode.advanced.title')}
                 </AccordionTrigger>
                 <AccordionContent className="pt-2">
                   <div className="flex flex-col gap-2">
                     <div className="text-subtitle text-primary flex items-center gap-1">
-                      Model
+                      {t('agentNode.advanced.model')}
                     </div>
                     <ModelSelector
                       models={availableModels}
                       value={selectedModel?.model_name || ""}
                       onChange={handleModelChange}
-                      placeholder="Auto"
+                      placeholder={t('agentNode.advanced.autoPlaceholder')}
                     />
                     {selectedModel && (
                       <button
                         onClick={handleUseGlobalModel}
                         className="text-subtitle text-primary hover:text-foreground transition-colors text-left"
                       >
-                        Reset to Auto
+                        {t('agentNode.advanced.reset')}
                       </button>
                     )}
                   </div>
@@ -137,7 +156,7 @@ export function AgentNode({
         <AgentOutputDialog
           isOpen={isDialogOpen}
           onOpenChange={setIsDialogOpen}
-          name={data.name || "Agent"}
+          name={data.name || t('agentNode.name')}
           nodeId={id}
           flowId={currentFlowId?.toString() || null}
         />

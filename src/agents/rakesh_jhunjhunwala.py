@@ -6,6 +6,7 @@ import json
 from typing_extensions import Literal
 from src.tools.api import get_financial_metrics, get_market_cap, search_line_items
 from src.utils.llm import call_llm
+from src.utils.language import get_language_instruction
 from src.utils.progress import progress
 from src.utils.api_key import get_api_key_from_state
 
@@ -648,11 +649,12 @@ def generate_jhunjhunwala_output(
     agent_id: str,
 ) -> RakeshJhunjhunwalaSignal:
     """Get investment decision from LLM with Jhunjhunwala's principles"""
+    language_instruction = get_language_instruction(state)
     template = ChatPromptTemplate.from_messages(
         [
             (
                 "system",
-                """You are a Rakesh Jhunjhunwala AI agent. Decide on investment signals based on Rakesh Jhunjhunwala's principles:
+                f"""You are a Rakesh Jhunjhunwala AI agent. Decide on investment signals based on Rakesh Jhunjhunwala's principles:
                 - Circle of Competence: Only invest in businesses you understand
                 - Margin of Safety (> 30%): Buy at a significant discount to intrinsic value
                 - Economic Moat: Look for durable competitive advantages
@@ -673,6 +675,7 @@ def generate_jhunjhunwala_output(
                 For example, if bearish: "The deteriorating margins and high debt levels concern me - this doesn't fit the profile of companies that build lasting value..."
 
                 Follow these guidelines strictly.
+                {language_instruction}
                 """,
             ),
             (

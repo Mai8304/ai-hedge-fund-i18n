@@ -1,8 +1,9 @@
 import { cn } from '@/lib/utils';
 import { Cloud, Server } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { CloudModels } from './models/cloud';
 import { OllamaSettings } from './models/ollama';
+import { useTranslation } from '@/contexts/language-context';
 
 interface ModelsProps {
   className?: string;
@@ -17,24 +18,28 @@ interface ModelSection {
 }
 
 export function Models({ className }: ModelsProps) {
+  const { t } = useTranslation();
   const [selectedSection, setSelectedSection] = useState('cloud');
 
-  const modelSections: ModelSection[] = [
-    {
-      id: 'cloud',
-      label: 'Cloud',
-      icon: Cloud,
-      description: 'API-based models from cloud providers',
-      component: CloudModels,
-    },
-    {
-      id: 'local',
-      label: 'Ollama',
-      icon: Server,
-      description: 'Ollama models running locally on your machine',
-      component: OllamaSettings,
-    },
-  ];
+  const modelSections: ModelSection[] = useMemo(
+    () => [
+      {
+        id: 'cloud',
+        label: t('settings.models.tabs.cloud'),
+        icon: Cloud,
+        description: t('settings.models.tabs.cloud.description'),
+        component: CloudModels,
+      },
+      {
+        id: 'local',
+        label: t('settings.models.tabs.local'),
+        icon: Server,
+        description: t('settings.models.tabs.local.description'),
+        component: OllamaSettings,
+      },
+    ],
+    [t],
+  );
 
   const renderContent = () => {
     const section = modelSections.find(s => s.id === selectedSection);
@@ -47,9 +52,9 @@ export function Models({ className }: ModelsProps) {
   return (
     <div className={cn("space-y-6", className)}>
       <div>
-        <h2 className="text-xl font-semibold text-primary mb-2">Models</h2>
+        <h2 className="text-xl font-semibold text-primary mb-2">{t('settings.models.title')}</h2>
         <p className="text-sm text-muted-foreground">
-          Manage your AI models from local and cloud providers.
+          {t('settings.models.description')}
         </p>
       </div>
 
@@ -78,7 +83,7 @@ export function Models({ className }: ModelsProps) {
               {section.label}
               {isDisabled && (
                 <span className="text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
-                  Soon
+                  {t('general.soon')}
                 </span>
               )}
             </button>

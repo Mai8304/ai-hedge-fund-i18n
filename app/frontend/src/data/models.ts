@@ -8,23 +8,35 @@ export interface LanguageModel {
 
 // Cache for models to avoid repeated API calls
 let languageModels: LanguageModel[] | null = null;
+let loadingPromise: Promise<LanguageModel[]> | null = null;
 
 /**
  * Get the list of models from the backend API
  * Uses caching to avoid repeated API calls
  */
 export const getModels = async (): Promise<LanguageModel[]> => {
-  if (languageModels) {
+  if (languageModels && languageModels.length > 0) {
     return languageModels;
   }
-  
-  try {
-    languageModels = await api.getLanguageModels();
-    return languageModels;
-  } catch (error) {
-    console.error('Failed to fetch models:', error);
-    throw error; // Let the calling component handle the error
+
+  if (!loadingPromise) {
+    loadingPromise = api.getLanguageModels()
+      .then((fetchedModels) => {
+        if (fetchedModels.length > 0) {
+          languageModels = fetchedModels;
+        }
+        return fetchedModels;
+      })
+      .catch((error) => {
+        console.error('Failed to fetch models:', error);
+        throw error;
+      })
+      .finally(() => {
+        loadingPromise = null;
+      });
   }
+
+  return loadingPromise;
 };
 
 /**

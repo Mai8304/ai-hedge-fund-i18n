@@ -1,6 +1,6 @@
 import { useReactFlow, type NodeProps } from '@xyflow/react';
 import { ChartLine, ChevronDown, Play, Square } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useFlowContext } from '@/contexts/flow-context';
+import { useTranslation } from '@/contexts/language-context';
 import { useLayoutContext } from '@/contexts/layout-context';
 import { useNodeContext } from '@/contexts/node-context';
 import { useFlowConnection } from '@/hooks/use-flow-connection';
@@ -28,11 +29,6 @@ import { useNodeState } from '@/hooks/use-node-state';
 import { cn, formatKeyboardShortcut } from '@/lib/utils';
 import { type StockAnalyzerNode } from '../types';
 import { NodeShell } from './node-shell';
-
-const runModes = [
-  { value: 'single', label: 'Single Run' },
-  { value: 'backtest', label: 'Backtest' },
-];
 
 export function StockAnalyzerNode({
   data,
@@ -58,6 +54,15 @@ export function StockAnalyzerNode({
   const { getAllAgentModels } = nodeContext;
   const { getNodes, getEdges } = useReactFlow();
   const { expandBottomPanel, setBottomPanelTab } = useLayoutContext();
+  const { language, t } = useTranslation();
+
+  const runModes = useMemo(
+    () => [
+      { value: 'single', label: t('stockAnalyzer.runMode.single') },
+      { value: 'backtest', label: t('stockAnalyzer.runMode.backtest') },
+    ],
+    [t],
+  );
   
   // Use the new flow connection hook
   const flowId = currentFlowId?.toString() || null;
@@ -122,7 +127,7 @@ export function StockAnalyzerNode({
     if (!value) return '';
     const num = parseFloat(value);
     if (isNaN(num)) return value;
-    return num.toLocaleString('en-US');
+    return num.toLocaleString();
   };
 
   const handleStop = () => {
@@ -210,6 +215,7 @@ export function StockAnalyzerNode({
         margin_requirement: 0.0, // Default margin requirement
         model_name: undefined,
         model_provider: undefined,
+        language,
       });
     } else {
       // Use the regular hedge fund API for single run
@@ -229,6 +235,7 @@ export function StockAnalyzerNode({
         model_provider: undefined,
         start_date: startDate,
         end_date: endDate,
+        language,
       });
     }
   };
@@ -243,7 +250,7 @@ export function StockAnalyzerNode({
         selected={selected}
         isConnectable={isConnectable}
         icon={<ChartLine className="h-5 w-5" />}
-        name={data.name || "Stock Analyzer"}
+        name={data.name || t('stockAnalyzer.name')}
         description={data.description}
         hasLeftHandle={false}
       >
@@ -254,22 +261,22 @@ export function StockAnalyzerNode({
                 <div className="text-subtitle text-primary flex items-center gap-1">
                   <Tooltip delayDuration={200}>
                     <TooltipTrigger asChild>
-                      <span>Tickers</span>
+                      <span>{t('stockAnalyzer.tickers.label')}</span>
                     </TooltipTrigger>
                     <TooltipContent side="right">
-                      You can add multiple tickers using commas (AAPL,NVDA,TSLA)
+                      {t('stockAnalyzer.tickers.tooltip')}
                     </TooltipContent>
                   </Tooltip>
                 </div>
                 <Input
-                  placeholder="Enter tickers"
+                  placeholder={t('stockAnalyzer.tickers.placeholder')}
                   value={tickers}
                   onChange={handleTickersChange}
                 />
               </div>
               <div className="flex flex-col gap-2">
                 <div className="text-subtitle text-primary flex items-center gap-1">
-                  Run
+                  {t('stockAnalyzer.run.label')}
                 </div>
                 <div className="flex gap-2">
                   <Popover open={open} onOpenChange={setOpen}>
@@ -281,7 +288,7 @@ export function StockAnalyzerNode({
                         className="flex-1 justify-between h-10 px-3 py-2 bg-node border border-border hover:bg-accent"
                       >
                         <span className="text-subtitle">
-                          {runModes.find((mode) => mode.value === runMode)?.label || 'Single Run'}
+                          {runModes.find((mode) => mode.value === runMode)?.label ?? t('stockAnalyzer.runMode.single')}
                         </span>
                         <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
@@ -289,7 +296,7 @@ export function StockAnalyzerNode({
                     <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-node border border-border shadow-lg">
                       <Command className="bg-node">
                         <CommandList className="bg-node">
-                          <CommandEmpty>No run mode found.</CommandEmpty>
+                          <CommandEmpty>{t('stockAnalyzer.runMode.empty')}</CommandEmpty>
                           <CommandGroup>
                             {runModes.map((mode) => (
                               <CommandItem
@@ -300,7 +307,7 @@ export function StockAnalyzerNode({
                                   runMode === mode.value
                                 )}
                                 onSelect={(currentValue) => {
-                                  setRunMode(currentValue);
+                                  setRunMode(currentValue as typeof runMode);
                                   setOpen(false);
                                 }}
                               >
@@ -316,7 +323,11 @@ export function StockAnalyzerNode({
                     size="icon" 
                     variant="secondary"
                     className="flex-shrink-0 transition-all duration-200 hover:bg-primary hover:text-primary-foreground active:scale-95"
-                    title={showAsProcessing ? "Stop" : `Run (${formatKeyboardShortcut('↵')})`}
+                    title={
+                      showAsProcessing
+                        ? t('stockAnalyzer.controls.stop')
+                        : t('stockAnalyzer.controls.runTooltip', { shortcut: formatKeyboardShortcut('↵') })
+                    }
                     onClick={showAsProcessing ? handleStop : handlePlay}
                     disabled={!canRunHedgeFund && !showAsProcessing}
                   >
@@ -332,13 +343,13 @@ export function StockAnalyzerNode({
                 <Accordion type="single" collapsible>
                   <AccordionItem value="advanced" className="border-none">
                     <AccordionTrigger className="!text-subtitle text-primary">
-                      Advanced
+                      {t('stockAnalyzer.advanced.title')}
                     </AccordionTrigger>
                     <AccordionContent className="pt-2">
                       <div className="flex flex-col gap-4">
                         <div className="flex flex-col gap-2">
                           <div className="text-subtitle text-primary flex items-center gap-1">
-                            Available Cash
+                            {t('stockAnalyzer.advanced.cash')}
                           </div>
                           <div className="relative flex-1">
                             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none">
@@ -355,7 +366,7 @@ export function StockAnalyzerNode({
                         </div>
                         <div className="flex flex-col gap-2">
                           <div className="text-subtitle text-primary flex items-center gap-1">
-                            Start Date
+                            {t('stockAnalyzer.advanced.startDate')}
                           </div>
                           <Input
                             type="date"
@@ -365,7 +376,7 @@ export function StockAnalyzerNode({
                         </div>
                         <div className="flex flex-col gap-2">
                           <div className="text-subtitle text-primary flex items-center gap-1">
-                            End Date
+                            {t('stockAnalyzer.advanced.endDate')}
                           </div>
                           <Input
                             type="date"
@@ -382,13 +393,13 @@ export function StockAnalyzerNode({
                 <Accordion type="single" collapsible>
                   <AccordionItem value="advanced" className="border-none">
                     <AccordionTrigger className="!text-subtitle text-primary">
-                      Advanced
+                      {t('stockAnalyzer.advanced.title')}
                     </AccordionTrigger>
                     <AccordionContent className="pt-2">
                       <div className="flex flex-col gap-4">
                         <div className="flex flex-col gap-2">
                           <div className="text-subtitle text-primary flex items-center gap-1">
-                            End Date
+                            {t('stockAnalyzer.advanced.endDate')}
                           </div>
                           <Input
                             type="date"
@@ -398,7 +409,7 @@ export function StockAnalyzerNode({
                         </div>
                         <div className="flex flex-col gap-2">
                           <div className="text-subtitle text-primary flex items-center gap-1">
-                            Start Date
+                            {t('stockAnalyzer.advanced.startDate')}
                           </div>
                           <Input
                             type="date"

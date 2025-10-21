@@ -36,6 +36,7 @@ def test_short_only_strategy_shorts_and_covers():
         model_provider="test-provider",
         selected_analysts=None,
         initial_margin_requirement=margin_requirement,
+        language="EN",
     )
 
     performance_metrics = engine.run_backtest()
@@ -115,6 +116,7 @@ def test_short_only_strategy_full_cover_cycle():
         model_provider="test-provider",
         selected_analysts=None,
         initial_margin_requirement=margin_requirement,
+        language="EN",
     )
 
     performance_metrics = engine.run_backtest()
@@ -191,6 +193,7 @@ def test_short_only_strategy_multiple_short_cover_cycles():
         model_provider="test-provider",
         selected_analysts=None,
         initial_margin_requirement=margin_requirement,
+        language="EN",
     )
 
     performance_metrics = engine.run_backtest()
@@ -278,6 +281,7 @@ def test_short_only_strategy_portfolio_rebalancing():
         model_provider="test-provider",
         selected_analysts=None,
         initial_margin_requirement=margin_requirement,
+        language="EN",
     )
 
     performance_metrics = engine.run_backtest()
@@ -359,6 +363,7 @@ def test_short_only_strategy_dollar_cost_averaging_on_short():
         model_provider="test-provider",
         selected_analysts=None,
         initial_margin_requirement=margin_requirement,
+        language="EN",
     )
 
     performance_metrics = engine.run_backtest()

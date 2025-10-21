@@ -1,17 +1,12 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useFlowConnectionState } from '@/hooks/use-flow-connection';
+import { useTranslation } from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
 import { flowService } from '@/services/flow-service';
 import { Flow } from '@/types/flow';
-import {
-  Calendar,
-  FileText,
-  Layout,
-  MoreHorizontal,
-  Zap
-} from 'lucide-react';
-import { useState } from 'react';
+import { Calendar, FileText, Layout, MoreHorizontal, Zap } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { FlowContextMenu } from './flow-context-menu';
 import { FlowEditDialog } from './flow-edit-dialog';
 
@@ -24,6 +19,7 @@ interface FlowItemProps {
 }
 
 export default function FlowItem({ flow, onLoadFlow, onDeleteFlow, onRefresh, isActive = false }: FlowItemProps) {
+  const { t, language } = useTranslation();
   const [contextMenu, setContextMenu] = useState<{ isOpen: boolean; position: { x: number; y: number } }>({
     isOpen: false,
     position: { x: 0, y: 0 }
@@ -34,6 +30,19 @@ export default function FlowItem({ flow, onLoadFlow, onDeleteFlow, onRefresh, is
   const connectionState = useFlowConnectionState(flow.id.toString());
   const hasActiveConnection = connectionState && 
     (connectionState.state === 'connecting' || connectionState.state === 'connected');
+
+  const locale = useMemo(() => {
+    const map: Record<string, string> = {
+      EN: 'en-US',
+      CN: 'zh-CN',
+      JA: 'ja-JP',
+      KO: 'ko-KR',
+      AR: 'ar',
+      FR: 'fr-FR',
+      DE: 'de-DE',
+    };
+    return map[language] ?? 'en-US';
+  }, [language]);
 
   const handleLoadFlow = async () => {
     await onLoadFlow(flow);
@@ -78,7 +87,7 @@ export default function FlowItem({ flow, onLoadFlow, onDeleteFlow, onRefresh, is
   };
 
   const handleDeleteFlow = async () => {
-    if (window.confirm(`Are you sure you want to delete "${flow.name}"?`)) {
+    if (window.confirm(t('flows.item.confirmDelete', { name: flow.name }))) {
       try {
         await onDeleteFlow(flow);
       } catch (error) {
@@ -87,17 +96,15 @@ export default function FlowItem({ flow, onLoadFlow, onDeleteFlow, onRefresh, is
     }
   };
 
-  const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-US', {
+  const formatDateTime = (dateString: string) =>
+    new Intl.DateTimeFormat(locale, {
+      year: 'numeric',
       month: 'short',
       day: 'numeric',
-      year: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
       second: '2-digit',
-      hour12: true
-    });
-  };
+    }).format(new Date(dateString));
 
   // Filter out "default" tag
   const filteredTags = flow.tags?.filter(tag => tag !== 'default') || [];
@@ -142,7 +149,9 @@ export default function FlowItem({ flow, onLoadFlow, onDeleteFlow, onRefresh, is
             {hasActiveConnection && (
               <div className="flex items-center gap-1 flex-shrink-0">
                 <Zap className="h-3 w-3 text-yellow-500 animate-pulse" />
-                <span className="text-xs text-yellow-500 font-medium">Running</span>
+                <span className="text-xs text-yellow-500 font-medium">
+                  {t('flows.item.status.running')}
+                </span>
               </div>
             )}
           </div>
@@ -161,7 +170,7 @@ export default function FlowItem({ flow, onLoadFlow, onDeleteFlow, onRefresh, is
               ))}
               {filteredTags.length > 2 && (
                 <Badge variant="secondary" className="text-xs px-1 py-0">
-                  +{filteredTags.length - 2}
+                  {t('flows.item.tags.more', { count: filteredTags.length - 2 })}
                 </Badge>
               )}
             </div>
@@ -174,7 +183,7 @@ export default function FlowItem({ flow, onLoadFlow, onDeleteFlow, onRefresh, is
             size="icon"
             onClick={handleMenuClick}
             className="h-6 w-6 text-muted-foreground hover-item opacity-0 group-hover:opacity-100 transition-opacity rounded"
-            title="More options"
+            title={t('flows.item.moreOptions')}
           >
             <MoreHorizontal size={14} />
           </Button>

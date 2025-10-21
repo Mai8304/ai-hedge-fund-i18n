@@ -3,83 +3,110 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { apiKeysService } from '@/services/api-keys-api';
 import { Eye, EyeOff, Key, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from '@/contexts/language-context';
 
-interface ApiKey {
+interface ApiKeyDefinition {
   key: string;
-  label: string;
-  description: string;
+  labelKey: string;
+  descriptionKey: string;
   url: string;
   placeholder: string;
 }
 
-const FINANCIAL_API_KEYS: ApiKey[] = [
+const FINANCIAL_API_KEYS: ApiKeyDefinition[] = [
   {
     key: 'FINANCIAL_DATASETS_API_KEY',
-    label: 'Financial Datasets API',
-    description: 'For getting financial data to power the hedge fund',
+    labelKey: 'settings.apiKeys.financial.keys.datasets.label',
+    descriptionKey: 'settings.apiKeys.financial.keys.datasets.description',
     url: 'https://financialdatasets.ai/',
     placeholder: 'your-financial-datasets-api-key'
   }
 ];
 
-const LLM_API_KEYS: ApiKey[] = [
+const LLM_API_KEYS: ApiKeyDefinition[] = [
   {
     key: 'ANTHROPIC_API_KEY',
-    label: 'Anthropic API',
-    description: 'For Claude models (claude-4-sonnet, claude-4.1-opus, etc.)',
+    labelKey: 'settings.apiKeys.llm.keys.anthropic.label',
+    descriptionKey: 'settings.apiKeys.llm.keys.anthropic.description',
     url: 'https://anthropic.com/',
     placeholder: 'your-anthropic-api-key'
   },
   {
     key: 'DEEPSEEK_API_KEY',
-    label: 'DeepSeek API',
-    description: 'For DeepSeek models (deepseek-chat, deepseek-reasoner, etc.)',
+    labelKey: 'settings.apiKeys.llm.keys.deepseek.label',
+    descriptionKey: 'settings.apiKeys.llm.keys.deepseek.description',
     url: 'https://deepseek.com/',
     placeholder: 'your-deepseek-api-key'
   },
   {
     key: 'GROQ_API_KEY',
-    label: 'Groq API',
-    description: 'For Groq-hosted models (deepseek, llama3, etc.)',
+    labelKey: 'settings.apiKeys.llm.keys.groq.label',
+    descriptionKey: 'settings.apiKeys.llm.keys.groq.description',
     url: 'https://groq.com/',
     placeholder: 'your-groq-api-key'
   },
   {
     key: 'GOOGLE_API_KEY',
-    label: 'Google API',
-    description: 'For Gemini models (gemini-2.5-flash, gemini-2.5-pro)',
+    labelKey: 'settings.apiKeys.llm.keys.google.label',
+    descriptionKey: 'settings.apiKeys.llm.keys.google.description',
     url: 'https://ai.dev/',
     placeholder: 'your-google-api-key'
   },
   {
     key: 'OPENAI_API_KEY',
-    label: 'OpenAI API',
-    description: 'For OpenAI models (gpt-4o, gpt-4o-mini, etc.)',
+    labelKey: 'settings.apiKeys.llm.keys.openai.label',
+    descriptionKey: 'settings.apiKeys.llm.keys.openai.description',
     url: 'https://platform.openai.com/',
     placeholder: 'your-openai-api-key'
   },
   {
     key: 'OPENROUTER_API_KEY',
-    label: 'OpenRouter API',
-    description: 'For OpenRouter models (gpt-4o, gpt-4o-mini, etc.)',
+    labelKey: 'settings.apiKeys.llm.keys.openrouter.label',
+    descriptionKey: 'settings.apiKeys.llm.keys.openrouter.description',
     url: 'https://openrouter.ai/',
     placeholder: 'your-openrouter-api-key'
   },
   {
     key: 'GIGACHAT_API_KEY',
-    label: 'GigaChat API',
-    description: 'For GigaChat models (GigaChat-2-Max, etc.)',
+    labelKey: 'settings.apiKeys.llm.keys.gigachat.label',
+    descriptionKey: 'settings.apiKeys.llm.keys.gigachat.description',
     url: 'https://github.com/ai-forever/gigachat',
     placeholder: 'your-gigachat-api-key'
   }
 ];
 
+type ResolvedApiKey = ApiKeyDefinition & {
+  label: string;
+  description: string;
+};
+
 export function ApiKeysSettings() {
+  const { t } = useTranslation();
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
   const [visibleKeys, setVisibleKeys] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const financialApiKeys = useMemo<ResolvedApiKey[]>(
+    () =>
+      FINANCIAL_API_KEYS.map((item) => ({
+        ...item,
+        label: t(item.labelKey),
+        description: t(item.descriptionKey),
+      })),
+    [t],
+  );
+
+  const llmApiKeys = useMemo<ResolvedApiKey[]>(
+    () =>
+      LLM_API_KEYS.map((item) => ({
+        ...item,
+        label: t(item.labelKey),
+        description: t(item.descriptionKey),
+      })),
+    [t],
+  );
 
   // Load API keys from backend on component mount
   useEffect(() => {
@@ -106,7 +133,7 @@ export function ApiKeysSettings() {
       setApiKeys(keysData);
     } catch (err) {
       console.error('Failed to load API keys:', err);
-      setError('Failed to load API keys. Please try again.');
+      setError(t('settings.apiKeys.error.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -138,7 +165,7 @@ export function ApiKeysSettings() {
       }
     } catch (err) {
       console.error(`Failed to save API key ${key}:`, err);
-      setError(`Failed to save ${key}. Please try again.`);
+      setError(t('settings.apiKeys.error.saveFailed', { key }));
     }
   };
 
@@ -159,11 +186,11 @@ export function ApiKeysSettings() {
       });
     } catch (err) {
       console.error(`Failed to delete API key ${key}:`, err);
-      setError(`Failed to delete ${key}. Please try again.`);
+      setError(t('settings.apiKeys.error.deleteFailed', { key }));
     }
   };
 
-  const renderApiKeySection = (title: string, description: string, keys: ApiKey[], icon: React.ReactNode) => (
+  const renderApiKeySection = (title: string, description: string, keys: ResolvedApiKey[], icon: React.ReactNode) => (
     <Card className="bg-panel border-gray-700 dark:border-gray-700">
       <CardHeader>
         <CardTitle className="text-lg font-medium text-primary flex items-center gap-2">
@@ -224,15 +251,15 @@ export function ApiKeysSettings() {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-xl font-semibold text-primary mb-2">API Keys</h2>
+          <h2 className="text-xl font-semibold text-primary mb-2">{t('settings.apiKeys.title')}</h2>
           <p className="text-sm text-muted-foreground">
-            Loading API keys...
+            {t('settings.apiKeys.loading')}
           </p>
         </div>
         <Card className="bg-panel border-gray-700 dark:border-gray-700">
           <CardContent className="p-6">
             <div className="text-sm text-muted-foreground">
-              Please wait while we load your API keys...
+              {t('settings.apiKeys.loadingHint')}
             </div>
           </CardContent>
         </Card>
@@ -243,10 +270,9 @@ export function ApiKeysSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-primary mb-2">API Keys</h2>
+        <h2 className="text-xl font-semibold text-primary mb-2">{t('settings.apiKeys.title')}</h2>
         <p className="text-sm text-muted-foreground">
-          Configure API endpoints and authentication credentials for financial data and language models.
-          Changes are automatically saved.
+          {t('settings.apiKeys.description')}
         </p>
       </div>
 
@@ -257,7 +283,7 @@ export function ApiKeysSettings() {
             <div className="flex items-start gap-3">
               <Key className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
               <div className="space-y-1">
-                <h4 className="text-sm font-medium text-red-500">Error</h4>
+                <h4 className="text-sm font-medium text-red-500">{t('general.error')}</h4>
                 <p className="text-xs text-muted-foreground">{error}</p>
                 <Button
                   variant="ghost"
@@ -268,7 +294,7 @@ export function ApiKeysSettings() {
                   }}
                   className="text-xs mt-2 p-0 h-auto text-red-500 hover:text-red-400"
                 >
-                  Try again
+                  {t('general.retry')}
                 </Button>
               </div>
             </div>
@@ -278,17 +304,17 @@ export function ApiKeysSettings() {
 
       {/* Financial Data API Keys */}
       {renderApiKeySection(
-        'Financial Data',
-        'API keys for accessing financial market data and datasets.',
-        FINANCIAL_API_KEYS,
+        t('settings.apiKeys.sections.financial.title'),
+        t('settings.apiKeys.sections.financial.description'),
+        financialApiKeys,
         <Key className="h-4 w-4" />
       )}
 
       {/* LLM API Keys */}
       {renderApiKeySection(
-        'Language Models',
-        'API keys for accessing various large language model providers.',
-        LLM_API_KEYS,
+        t('settings.apiKeys.sections.llm.title'),
+        t('settings.apiKeys.sections.llm.description'),
+        llmApiKeys,
         <Key className="h-4 w-4" />
       )}
 
@@ -298,11 +324,8 @@ export function ApiKeysSettings() {
           <div className="flex items-start gap-3">
             <Key className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
             <div className="space-y-1">
-              <h4 className="text-sm font-medium text-amber-500">Security Note</h4>
-              <p className="text-xs text-muted-foreground">
-                API keys are stored securely on your local system and changes are automatically saved. 
-                Keep your API keys secure and don't share them with others.
-              </p>
+              <h4 className="text-sm font-medium text-amber-500">{t('settings.apiKeys.security.title')}</h4>
+              <p className="text-xs text-muted-foreground">{t('settings.apiKeys.security.description')}</p>
             </div>
           </div>
         </CardContent>

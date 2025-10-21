@@ -7,22 +7,22 @@
   {
     "display_name": "GPT-5",
     "model_name": "gpt-5",
-    "provider": "OpenAI"
+    "provider": "OpenRouter"
   },
   {
     "display_name": "GPT-5 mini",
     "model_name": "gpt-5-mini",
-    "provider": "OpenAI"
+    "provider": "OpenRouter"
   },
   {
     "display_name": "GPT-5 nano",
     "model_name": "gpt-5-nano",
-    "provider": "OpenAI"
+    "provider": "OpenRouter"
   },
   {
     "display_name": "GPT-4o",
     "model_name": "gpt-4o",
-    "provider": "OpenAI"
+    "provider": "OpenRouter"
   },
   {
     "display_name": "Claude Haiku 3.5",

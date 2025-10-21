@@ -1,6 +1,6 @@
 # AI Hedge Fund 多语言增强版
 
-本项目基于开源项目 [ai-hedge-fund](https://github.com/virattt/ai-hedge-fund) 二次开发，在原有「多智能体投研 + 流程编排 + 回测」能力基础上，重点增强了多语言体验与界面可用性，适合需要跨语言团队协作或面向全球用户的场景。
+本项目基于开源项目 [ai-hedge-fund](https://github.com/virattt/ai-hedge-fund) 二次开发，在原有「多智能体投研 + 流程编排 + 回测」能力基础上，重点增强了多语言体验与界面可用性，支持英文（默认），中文，日语，韩语，法语，德语，阿拉伯语。
 
 ---
 
@@ -10,82 +10,139 @@
 |------|------|------------|
 | 多语言支持 | 命令行输出可选语言，Web UI 主要为英文 | **全局多语言**：Web UI + 流程输出 + 侧边栏/弹窗文案全面支持 EN/CN/JA/KO/AR/FR/DE，内建翻译字典与语言切换面板 |
 | 文案管理 | 零散字符串、缺少翻译回退 | 引入统一翻译上下文，所有可见文案通过 `useTranslation` 输出，确保语言切换一致且可维护 |
-| Flow 管理体验 | 流程列表为英文提示 | 流程列表、状态、弹窗、搜索框全面汉化，可根据用户语言调整时间格式与按钮文案 |
-| API 密钥 & 模型设置 | 多处英文 | 设置页面支持多语言文本，API 密钥类别说明 & 错误提示也可本地化 |
-| 样式一致性 | 部分弹窗未对齐主题 | 调整上下文菜单/弹窗背景使用主题 token，深浅色模式保持一致 |
-| 语言配置 | CLI + Web 可切换 | 增强语言状态持久化，Web 端语言切换即刻生效，提示说明均同步更新 |
+
 
 > 原项目所有智能体、回测、流程编排特性保持一致，本仓库在此基础上专注国际化与体验提升，方便被 Fork、品牌化或整合至多语言产品中。
 
----
+> **智能体的推理过程仍以英文进行，只对最终展示内容做多语言翻译，以保障分析准确性。**
 
-## ✨ 核心能力总览
-
-- **多智能体投研体系**：内置十余位投资风格化身（巴菲特、木头姐等），可编排协同作业。
-- **可视化流程编排**：可视化拖拽节点、保存模板，实时查看智能体推理进度。
-- **支持多模型引擎**：OpenAI / Anthropic / DeepSeek / Groq / Google / OpenRouter / Ollama。
-- **回测与执行**：提供区间回测、信号分析、持仓曝光等经典量化指标。
-- **本地与云端灵活部署**：Poetry 管理 Python 依赖，前端 Vite + React，自宿主运行即可。
-
----
-
-## 🛠 环境准备
-
-| 组件            | 推荐版本                  |
-|-----------------|---------------------------|
-| Python          | 3.11+                     |
-| Poetry          | 1.6+                      |
-| Node.js         | 18 LTS / 20 LTS           |
-| pnpm / npm      | 任意                      |
-| Ollama（可选）  | 用于本地模型推理          |
 
 ---
 
 ## 🚀 快速开始
 
-### 1. 克隆仓库
+在运行 AI Hedge Fund i18n之前，你需要先完成安装并配置 API 密钥。以下步骤适用于 **全栈 Web 应用** 和 **命令行工具（CLI）** 两种方式。
+
+---
+
+### 1. 克隆仓库（Clone the Repository）
 
 ```bash
-git clone https://github.com/<your-account>/ai-hedge-fund-i18n.git
+git clone https://github.com/Mai8304/ai-hedge-fund-i18n.git
 cd ai-hedge-fund-i18n
 ```
 
-### 2. 配置环境变量
+---
+
+### 2. 设置 API 密钥（Set up API keys）
+
+在项目根目录创建一个 `.env` 文件，用于存放 API 密钥：
 
 ```bash
+# 在项目根目录创建 .env 文件
 cp .env.example .env
 ```
 
-在 `.env` 中填入至少一个大模型密钥，例如：
-
-```dotenv
-OPENAI_API_KEY=your-openai-key
-FINANCIAL_DATASETS_API_KEY=your-financialdatasets-key
-```
-
-若使用本地 Ollama，可省略云端密钥，但需预先安装并拉取模型。
-
-### 3. 安装依赖
+打开并编辑 `.env` 文件，添加你的 API 密钥：
 
 ```bash
-poetry install                    # 后端/核心
-cd app/frontend && pnpm install   # 或 npm install
+# 如果使用 OpenAI 托管的 LLM 模型（gpt-4o、gpt-4o-mini 等）
+OPENAI_API_KEY=your-openai-api-key
+
+# 如果需要获取金融数据来驱动 Hedge Fund
+FINANCIAL_DATASETS_API_KEY=your-financial-datasets-api-key
 ```
 
-### 4. 启动服务
+**重要提示：**  
+你必须至少设置一个 LLM API 密钥（如 `OPENAI_API_KEY`、`GROQ_API_KEY`、`ANTHROPIC_API_KEY` 或 `DEEPSEEK_API_KEY`），AI Hedge Fund i18n 才能正常运行。
 
-后端（FastAPI）：
+**金融数据说明：**  
+对于 AAPL、GOOGL、MSFT、NVDA 和 TSLA 等股票的数据是免费的，不需要 API 密钥。  
+若需访问其他股票，请在 `.env` 文件中设置 `FINANCIAL_DATASETS_API_KEY`。
 
+---
+
+## 如何运行（How to Run）
+
+### ⌨️ 命令行模式（Command Line Interface）
+
+你可以直接通过终端运行 AI Hedge Fund i18n。 
+这种方式便于自动化、脚本集成及更精细的控制。
+
+
+---
+
+#### 快速开始（Quick Start）
+
+1. 安装 Poetry（如果未安装）：
 ```bash
-cd app/backend
-poetry run uvicorn app.backend.main:app --reload --host 0.0.0.0 --port 8000
+curl -sSL https://install.python-poetry.org | python3 -
 ```
 
-前端（Vite）：
+2. 安装依赖：
+```bash
+poetry install
+```
+
+---
+
+#### 运行 AI Hedge Fund i18n
+```bash
+poetry run python src/main.py --ticker AAPL,MSFT,NVDA
+```
+
+你还可以添加 `--ollama` 参数，使用本地部署的 LLM 模型运行：
 
 ```bash
-cd app/frontend
-pnpm dev      # 或 npm run dev
+poetry run python src/main.py --ticker AAPL,MSFT,NVDA --ollama
+```
+
+也可以指定开始与结束日期，以便在特定时间区间内进行决策分析：
+
+```bash
+poetry run python src/main.py --ticker AAPL,MSFT,NVDA --start-date 2024-01-01 --end-date 2024-03-01
+```
+
+---
+
+#### 运行回测模块（Run the Backtester）
+```bash
+poetry run python src/backtester.py --ticker AAPL,MSFT,NVDA
+```
+
+
+> 提示：`--ollama`、`--start-date` 和 `--end-date` 参数同样适用于回测模块！
+
+---
+
+### 🖥️ Web 应用（Web Application）
+
+另一种更直观的方式是通过 Web 界面运行 AI Hedge Fund i18n。  
+该方式提供了更友好的可视化体验，适合不熟悉命令行的用户。
+
+请参考详细安装与运行指南：  
+[查看 Web 应用安装步骤（GitHub 链接）](https://github.com/virattt/ai-hedge-fund/tree/main/app)
+
+
+- 「设置 → 语言」面板可切换 UI 语言；
+- 切换后前端 UI、流程面板、日志、弹窗文案实时变更；
+- 命令行和 Web 运行任务的分析报告会同步采用选择的语言；
+
+已内置的翻译（可按需扩展）：
+
+```
+EN · English
+CN · 简体中文
+JA · 日本語
+KO · 한국어
+AR · العربية
+FR · Français
+DE · Deutsch
+```
+
+继续扩展新语言时，仅需在 `app/frontend/src/locales/` 新增对应 JSON，并注册于 `language-context` 中即可。
+
+
 ```
 
 访问 `http://localhost:5173` 即可体验多语言界面与流程编排。
@@ -121,43 +178,6 @@ poetry run python src/backtester.py \
   --language JA
 ```
 
----
-
-## 🌐 Web 端多语言体验
-
-- 「设置 → 语言」面板可切换 UI 语言；
-- 切换后前端 UI、流程面板、日志、弹窗文案实时变更；
-- 命令行和 Web 运行任务的分析报告会同步采用选择的语言；
-
-已内置的翻译（可按需扩展）：
-
-```
-EN · English
-CN · 简体中文
-JA · 日本語
-KO · 한국어
-AR · العربية
-FR · Français
-DE · Deutsch
-```
-
-继续扩展新语言时，仅需在 `app/frontend/src/locales/` 新增对应 JSON，并注册于 `language-context` 中即可。
-
----
-
-## 🔐 模型与 API 管理
-
-在 Web 控制台的「设置」可填写以下服务的密钥（同样支持多语言说明）：
-
-| 服务商      | 说明                                  |
-|-------------|---------------------------------------|
-| OpenAI      | GPT-4o / GPT-4o mini 等               |
-| Anthropic   | Claude 系列                           |
-| DeepSeek    | deepseek-chat / deepseek-reasoner     |
-| Groq        | Groq 托管模型（DeepSeek、Llama3 等）  |
-| Google      | Gemini 2.5 Flash / Pro                |
-| OpenRouter  | 聚合多家模型                          |
-| FinancialDatasets | 行业/财务数据，非必填            |
 
 ### 使用本地 Ollama
 

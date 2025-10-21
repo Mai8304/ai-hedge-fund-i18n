@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { useTabsContext } from '@/contexts/tabs-context';
+import { useTranslation } from '@/contexts/language-context';
 import { useToastManager } from '@/hooks/use-toast-manager';
 import { flowService } from '@/services/flow-service';
 import { Flow } from '@/types/flow';
@@ -27,6 +28,7 @@ export function FlowEditDialog({ flow, isOpen, onClose, onFlowUpdated }: FlowEdi
   const [isLoading, setIsLoading] = useState(false);
   const { success, error } = useToastManager();
   const { updateFlowTabTitle } = useTabsContext();
+  const { t } = useTranslation();
 
   // Update form when flow changes
   useEffect(() => {
@@ -38,7 +40,7 @@ export function FlowEditDialog({ flow, isOpen, onClose, onFlowUpdated }: FlowEdi
 
   const handleSave = async () => {
     if (!flow || !name.trim()) {
-      error('Flow name is required');
+      error(t('flows.edit.nameRequired'));
       return;
     }
 
@@ -52,12 +54,12 @@ export function FlowEditDialog({ flow, isOpen, onClose, onFlowUpdated }: FlowEdi
       // Update the tab title if it's currently open
       updateFlowTabTitle(flow.id, name.trim());
       
-      success(`"${name}" updated!`);
+      success(t('flows.edit.success', { name: name.trim() }));
       onFlowUpdated();
       onClose();
     } catch (err) {
       console.error('Failed to update flow:', err);
-      error('Failed to update flow');
+      error(t('flows.edit.error'));
     } finally {
       setIsLoading(false);
     }
@@ -85,37 +87,37 @@ export function FlowEditDialog({ flow, isOpen, onClose, onFlowUpdated }: FlowEdi
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit Flow</DialogTitle>
+          <DialogTitle>{t('flows.edit.title')}</DialogTitle>
           <DialogDescription>
-            Update the name and description for your flow.
+            {t('flows.edit.description')}
           </DialogDescription>
         </DialogHeader>
         
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <label htmlFor="name" className="text-sm font-medium">
-              Name
+              {t('flows.edit.nameLabel')}
             </label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Enter flow name"
+              placeholder={t('flows.edit.namePlaceholder')}
               className="col-span-3"
             />
           </div>
           
           <div className="grid gap-2">
             <label htmlFor="description" className="text-sm font-medium">
-              Description
+              {t('flows.edit.descriptionLabel')}
             </label>
             <Input
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Enter flow description (optional)"
+              placeholder={t('flows.edit.descriptionPlaceholder')}
               className="col-span-3"
             />
           </div>
@@ -123,13 +125,13 @@ export function FlowEditDialog({ flow, isOpen, onClose, onFlowUpdated }: FlowEdi
         
         <DialogFooter>
           <Button variant="outline" onClick={handleCancel}>
-            Cancel
+            {t('flows.edit.cancel')}
           </Button>
           <Button 
             onClick={handleSave} 
             disabled={isLoading || !name.trim()}
           >
-            {isLoading ? 'Saving...' : 'Save Changes'}
+            {isLoading ? t('flows.edit.saving') : t('flows.edit.save')}
           </Button>
         </DialogFooter>
       </DialogContent>

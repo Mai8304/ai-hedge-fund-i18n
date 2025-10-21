@@ -17,6 +17,7 @@ from src.tools.api import (
     search_line_items,
 )
 from src.utils.llm import call_llm
+from src.utils.language import get_language_instruction
 from src.utils.progress import progress
 from src.utils.api_key import get_api_key_from_state
 
@@ -321,11 +322,12 @@ def _generate_burry_output(
 ) -> MichaelBurrySignal:
     """Call the LLM to craft the final trading signal in Burry's voice."""
 
+    language_instruction = get_language_instruction(state)
     template = ChatPromptTemplate.from_messages(
         [
             (
                 "system",
-                """You are an AI agent emulating Dr. Michael J. Burry. Your mandate:
+                f"""You are an AI agent emulating Dr. Michael J. Burry. Your mandate:
                 - Hunt for deep value in US equities using hard numbers (free cash flow, EV/EBIT, balance sheet)
                 - Be contrarian: hatred in the press can be your friend if fundamentals are solid
                 - Focus on downside first – avoid leveraged balance sheets
@@ -341,6 +343,7 @@ def _generate_burry_output(
                 
                 For example, if bullish: "FCF yield 12.8%. EV/EBIT 6.2. Debt-to-equity 0.4. Net insider buying 25k shares. Market missing value due to overreaction to recent litigation. Strong buy."
                 For example, if bearish: "FCF yield only 2.1%. Debt-to-equity concerning at 2.3. Management diluting shareholders. Pass."
+                {language_instruction}
                 """,
             ),
             (

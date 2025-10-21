@@ -44,6 +44,7 @@ def test_long_only_strategy_buys_and_sells():
         model_provider="test-provider",
         selected_analysts=None,
         initial_margin_requirement=margin_requirement,
+        language="EN",
     )
     
     # Run the backtest
@@ -136,6 +137,7 @@ def test_long_only_strategy_full_liquidation_cycle():
         model_provider="test-provider",
         selected_analysts=None,
         initial_margin_requirement=margin_requirement,
+        language="EN",
     )
     
     # Run the backtest
@@ -241,6 +243,7 @@ def test_long_only_strategy_portfolio_rebalancing():
         model_provider="test-provider",
         selected_analysts=None,
         initial_margin_requirement=margin_requirement,
+        language="EN",
     )
     
     # Run the backtest
@@ -349,6 +352,7 @@ def test_long_only_strategy_multiple_entry_exit_cycles():
         model_provider="test-provider",
         selected_analysts=None,
         initial_margin_requirement=margin_requirement,
+        language="EN",
     )
     
     # Run the backtest

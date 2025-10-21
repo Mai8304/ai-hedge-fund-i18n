@@ -20,6 +20,7 @@ class AgentController:
         model_name: str,
         model_provider: str,
         selected_analysts: Sequence[str] | None,
+        language: str = "EN",
     ) -> AgentOutput:
         # Ensure we pass a plain snapshot dict to preserve legacy expectations
         if isinstance(portfolio, Portfolio):
@@ -35,6 +36,7 @@ class AgentController:
             model_name=model_name,
             model_provider=model_provider,
             selected_analysts=list(selected_analysts) if selected_analysts is not None else None,
+            language=language,
         )
 
         # Normalize outputs to avoid None/missing keys
@@ -63,5 +65,4 @@ class AgentController:
             "analyst_signals": analyst_signals_in,
         }
         return normalized_output
-
 

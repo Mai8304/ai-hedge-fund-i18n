@@ -12,6 +12,7 @@ import json
 from typing_extensions import Literal
 from src.utils.progress import progress
 from src.utils.llm import call_llm
+from src.utils.language import get_language_instruction
 import statistics
 from src.utils.api_key import get_api_key_from_state
 
@@ -537,12 +538,13 @@ def generate_fisher_output(
     """
     Generates a JSON signal in the style of Phil Fisher.
     """
+    language_instruction = get_language_instruction(state)
     template = ChatPromptTemplate.from_messages(
         [
             (
               "system",
-              """You are a Phil Fisher AI agent, making investment decisions using his principles:
-  
+              f"""You are a Phil Fisher AI agent, making investment decisions using his principles:
+      
               1. Emphasize long-term growth potential and quality of management.
               2. Focus on companies investing in R&D for future products/services.
               3. Look for strong profitability and consistent margins.
@@ -565,6 +567,7 @@ def generate_fisher_output(
                 - "signal": "bullish" or "bearish" or "neutral"
                 - "confidence": a float between 0 and 100
                 - "reasoning": a detailed explanation
+              {language_instruction}
               """,
             ),
             (

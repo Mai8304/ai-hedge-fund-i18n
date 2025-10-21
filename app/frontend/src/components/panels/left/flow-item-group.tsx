@@ -1,9 +1,11 @@
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Separator } from '@/components/ui/separator';
+import { useTranslation } from '@/contexts/language-context';
 import { Flow } from '@/types/flow';
 import FlowItem from './flow-item';
 
 interface FlowItemGroupProps {
+  id: string;
   title: string;
   flows: Flow[];
   onLoadFlow: (flow: Flow) => Promise<void>;
@@ -12,15 +14,16 @@ interface FlowItemGroupProps {
   currentFlowId?: number | null;
 }
 
-export function FlowItemGroup({ title, flows, onLoadFlow, onDeleteFlow, onRefresh, currentFlowId }: FlowItemGroupProps) {
-  const groupId = title.toLowerCase().replace(/\s+/g, '-');
+export function FlowItemGroup({ id, title, flows, onLoadFlow, onDeleteFlow, onRefresh, currentFlowId }: FlowItemGroupProps) {
+  const { t } = useTranslation();
+  const groupId = id;
 
   return (
     <AccordionItem value={groupId} className="border">
       <AccordionTrigger className="px-4 py-2 text-primary hover-bg hover:no-underline">
         <div className="flex items-center justify-between w-full">
           <span className="text-xs font-medium">{title}</span>
-          <span className="text-xs text-muted-foreground">({flows.length})</span>
+          <span className="text-xs text-muted-foreground">{t('flows.groups.count', { count: flows.length })}</span>
         </div>
       </AccordionTrigger>
       <AccordionContent className="px-0 pb-0">

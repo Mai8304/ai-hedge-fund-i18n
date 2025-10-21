@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
 import { Copy, Edit, Trash2 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
@@ -21,6 +22,7 @@ export function FlowContextMenu({
   onDelete 
 }: FlowContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -57,7 +59,7 @@ export function FlowContextMenu({
     <div
       ref={menuRef}
       className={cn(
-        "fixed z-50 min-w-[160px] bg-ramp-grey-800 border border rounded-md shadow-lg",
+        "fixed z-50 min-w-[160px] rounded-md border border-border bg-popover text-popover-foreground shadow-lg",
         "animate-in fade-in-0 zoom-in-95"
       )}
       style={{
@@ -69,31 +71,31 @@ export function FlowContextMenu({
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start text-primary hover-bg"
+          className="w-full justify-start"
           onClick={() => handleAction(onEdit)}
         >
           <Edit size={14} className="mr-2" />
-          Edit
+          {t('flows.contextMenu.edit')}
         </Button>
         
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start text-primary hover:bg-ramp-grey-700"
+          className="w-full justify-start"
           onClick={() => handleAction(onDuplicate)}
         >
           <Copy size={14} className="mr-2" />
-          Duplicate
+          {t('flows.contextMenu.duplicate')}
         </Button>
         
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start text-red-500 hover:bg-ramp-grey-700 hover:text-red-300"
+          className="w-full justify-start text-destructive hover:bg-destructive/10"
           onClick={() => handleAction(onDelete)}
         >
           <Trash2 size={14} className="mr-2" />
-          Delete
+          {t('flows.contextMenu.delete')}
         </Button>
       </div>
     </div>

@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 export function useComponentGroups(componentGroups: ComponentGroup[]) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeItem, setActiveItem] = useState<string | null>('Chat Input');
+  const [activeItem, setActiveItem] = useState<string | null>(null);
   const [openGroups, setOpenGroups] = useState<string[]>([]); // Start with all groups collapsed
   const [isSearching, setIsSearching] = useState(false);
 
@@ -11,18 +11,20 @@ export function useComponentGroups(componentGroups: ComponentGroup[]) {
   const filteredGroups = useMemo(() => {
     if (!searchQuery) return componentGroups;
 
-    return componentGroups.map(group => {
-      // Filter items within the group
-      const filteredItems = group.items.filter(item => 
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+    const lowered = searchQuery.toLowerCase();
 
-      // Return group with filtered items
-      return {
-        ...group,
-        items: filteredItems
-      };
-    }).filter(group => group.items.length > 0); // Only include groups with matching items
+    return componentGroups
+      .map((group) => {
+        const filteredItems = group.items.filter((item) =>
+          item.label.toLowerCase().includes(lowered) || item.name.toLowerCase().includes(lowered)
+        );
+
+        return {
+          ...group,
+          items: filteredItems,
+        };
+      })
+      .filter((group) => group.items.length > 0);
   }, [componentGroups, searchQuery]);
 
   // Handle search query changes

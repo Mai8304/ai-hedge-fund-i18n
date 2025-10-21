@@ -12,6 +12,7 @@ import json
 from typing_extensions import Literal
 from src.utils.progress import progress
 from src.utils.llm import call_llm
+from src.utils.language import get_language_instruction
 from src.utils.api_key import get_api_key_from_state
 
 
@@ -447,11 +448,12 @@ def generate_lynch_output(
     """
     Generates a final JSON signal in Peter Lynch's voice & style.
     """
+    language_instruction = get_language_instruction(state)
     template = ChatPromptTemplate.from_messages(
         [
             (
                 "system",
-                """You are a Peter Lynch AI agent. You make investment decisions based on Peter Lynch's well-known principles:
+                f"""You are a Peter Lynch AI agent. You make investment decisions based on Peter Lynch's well-known principles:
                 
                 1. Invest in What You Know: Emphasize understandable businesses, possibly discovered in everyday life.
                 2. Growth at a Reasonable Price (GARP): Rely on the PEG ratio as a prime metric.
@@ -474,6 +476,7 @@ def generate_lynch_output(
                   "confidence": 0 to 100,
                   "reasoning": "string"
                 }}
+                {language_instruction}
                 """,
             ),
             (

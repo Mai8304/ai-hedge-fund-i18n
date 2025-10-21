@@ -1,9 +1,10 @@
 import { cn } from '@/lib/utils';
 import { CubeIcon } from '@radix-ui/react-icons';
-import { Key, Palette } from 'lucide-react';
+import { Key, Palette, Languages } from 'lucide-react';
 import { useState } from 'react';
-import { ApiKeysSettings, Models } from './';
+import { ApiKeysSettings, Models, LanguageSettings } from './';
 import { ThemeSettings } from './appearance';
+import { useTranslation } from '@/contexts/language-context';
 
 interface SettingsProps {
   className?: string;
@@ -18,25 +19,32 @@ interface SettingsNavItem {
 
 export function Settings({ className }: SettingsProps) {
   const [selectedSection, setSelectedSection] = useState('api');
+  const { t } = useTranslation();
 
   const navigationItems: SettingsNavItem[] = [
     {
       id: 'api',
-      label: 'API Keys',
+      label: t('settings.section.api'),
       icon: Key,
-      description: 'API endpoints and authentication',
+      description: t('settings.section.api.desc'),
     },
     {
       id: 'models',
-      label: 'Models',
+      label: t('settings.section.models'),
       icon: CubeIcon,
-      description: 'Local and cloud AI models',
+      description: t('settings.section.models.desc'),
     },
     {
       id: 'theme',
-      label: 'Theme',
+      label: t('settings.section.theme'),
       icon: Palette,
-      description: 'Theme and display preferences',
+      description: t('settings.section.theme.desc'),
+    },
+    {
+      id: 'language',
+      label: t('settings.section.language'),
+      icon: Languages,
+      description: t('settings.section.language.desc'),
     },
   ];
 
@@ -48,6 +56,8 @@ export function Settings({ className }: SettingsProps) {
         return <ThemeSettings />;
       case 'api':
         return <ApiKeysSettings />;
+      case 'language':
+        return <LanguageSettings />;
       default:
         return <Models />;
     }
@@ -59,7 +69,7 @@ export function Settings({ className }: SettingsProps) {
         {/* Left Navigation Pane */}
         <div className="w-60 bg-panel flex-shrink-0">
           <div className="p-4 border-b">
-            <h1 className="text-lg font-semibold text-primary">Settings</h1>
+            <h1 className="text-lg font-semibold text-primary">{t('settings.title')}</h1>
           </div>
           <nav className="p-2">
             {navigationItems.map((item) => {
